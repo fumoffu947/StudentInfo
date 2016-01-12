@@ -1,4 +1,4 @@
-package main.InterfaceDataTransfer;
+package main.Interfaces.InterfaceDataTransfer;
 
 import main.Student;
 

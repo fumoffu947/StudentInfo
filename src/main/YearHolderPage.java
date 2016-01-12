@@ -1,8 +1,7 @@
 package main;
 
-import javafx.scene.text.*;
 import main.Comparators.ClassInfoComparator;
-import main.InterfaceDataTransfer.StudentClicked;
+import main.Interfaces.InterfaceDataTransfer.StudentClicked;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -40,6 +39,7 @@ public class YearHolderPage
 	    field.setHorizontalAlignment(JTextField.CENTER);
 	    field.setFont(new Font("Times New Roman", Font.BOLD, 15));
 	    field.setText(aClass.getClassName());
+	    System.out.println(aClass.getClassName());
 	    field.setEditable(false);
 	    panel.add(field);
 

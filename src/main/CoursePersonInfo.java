@@ -5,20 +5,22 @@ import java.util.List;
 /**
  * Created by fumoffu on 2015-10-20.
  * namn
- * (det som ska betyg sättas)
+ * (det som ska betyg sï¿½ttas)
  * ( krav i lista varje kravn kan ha fler del krav)
- * (första sida som är sumering av separate elev blad
+ * (fï¿½rsta sida som ï¿½r sumering av separate elev blad
  *
  *
  */
-public class Course  {
+public class CoursePersonInfo
+{
+
     private ClassInfo classInfo;
     private List<Student> otherEnlistedStudents;
     private String courseName;
     private Teacher teacher;
 
-    public Course(final ClassInfo classInfo, final List<Student> otherEnlistedStudents, final String courseName,
-		  final Teacher teacher)
+    public CoursePersonInfo(final ClassInfo classInfo, final List<Student> otherEnlistedStudents, final String courseName,
+			    final Teacher teacher)
     {
 	this.classInfo = classInfo;
 	this.otherEnlistedStudents = otherEnlistedStudents;

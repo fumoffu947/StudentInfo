@@ -1,6 +1,6 @@
 package main;
 
-import main.InterfaceDataTransfer.StudentCreationReturn;
+import main.Interfaces.InterfaceDataTransfer.StudentCreationReturn;
 
 import javax.swing.*;
 import java.awt.*;

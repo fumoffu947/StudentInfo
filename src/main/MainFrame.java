@@ -1,48 +1,81 @@
 package main;
 
-import main.InterfaceDataTransfer.StudentClicked;
+import main.Interfaces.InterfaceDataTransfer.StudentClicked;
+import main.Interfaces.RePackWindow;
 
-import javax.accessibility.AccessibleContext;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
+import javax.swing.table.TableColumn;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 
 /**
  * Created by fumoffu on 2015-10-20.
  *
  * (separeat adress sida)
- * separeat sida för avarje elev för varja kurs
+ * separeat sida fï¿½r avarje elev fï¿½r varja kurs
  */
 public class MainFrame extends JFrame
 {
+	private RePackWindow rePackWindow;
+	private JFrame mainFrame = this;
 
     public static void main(String[] args) {
 	new MainFrame();
     }
 
     public MainFrame(){
-	super("The InfoPager");
-	this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+	    super("The InfoPager");
+	    this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+	    this.rePackWindow = () -> {
+		    mainFrame.setMinimumSize(mainFrame.getSize());
+		    mainFrame.pack();
+		    mainFrame.setMaximumSize(null);
+	    };
 
-	addMenu();
+	    addMenu();
 
-	addExampleTextFields();
+	    addExampleTextFields();
 
-	exampleClassInfoPage();
-	/*
-	ArrayList<String> l = new ArrayList<>();
-	l.add("Niclas");
-	Student s = new Student(l,"sture",0,"073000000","@hotmail.com");
-	this.setContentPane(s.getjPanel()); // */
+	    exampleClassInfoPage();
 
-	//*
-	StudentCreation sc = new StudentCreation(student -> System.out.println(student.getFirstName()));
-	//this.setContentPane(sc.getjPanel());
+	    String[] columnNames = {"First Name",
+	                                    "Last Name",
+	                                    "Sport",
+	                                    "# of Years",
+	                                    "Vegetarian"};
 
-	this.pack();
-	this.setVisible(true);
+	            Object[][] data = {
+	            {"Kathy", "Smith",
+	             "Snowboarding", new Integer(5), new Boolean(false)},
+	            {"John", "Doe",
+	             "Rowing", new Integer(3), new Boolean(true)},
+	            {"Sue", "Black",
+	             "Knitting", new Integer(2), new Boolean(false)},
+	            {"Jane", "White",
+	             "Speed reading", new Integer(20), new Boolean(true)},
+	            {"Joe", "Brown",
+	             "Pool", new Integer(10), new Boolean(false)}
+	            };
+
+	            final JTable table = new JTable(data, columnNames);
+	            table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+	            table.setFillsViewportHeight(true);
+	    table.addColumn(new TableColumn(1));
+	    this.setContentPane(table);
+	    //this.setContentPane(new CreateCours(rePackWindow).getPageHolder());
+		/*
+		ArrayList<String> l = new ArrayList<>();
+		l.add("Niclas");
+		Student s = new Student(l,"sture",0,"073000000","@hotmail.com");
+		this.setContentPane(s.getjPanel()); // */
+
+		//*
+		StudentCreation sc = new StudentCreation(student -> System.out.println(student.getFirstName()));
+		//this.setContentPane(sc.getjPanel());
+
+		this.pack();
+		this.setVisible(true);
     }
 
     private void exampleClassInfoPage() {
@@ -55,9 +88,9 @@ public class MainFrame extends JFrame
 	students.add(new Student(name, "abbb", 0, "aaaa", "aaaa"));
 	students.add(new Student(name, "bbbb", 0, "aaaa", "aaaa"));
 
-	ClassInfo ca1 = new ClassInfo(students, "åk1");
-	ClassInfo ca2 = new ClassInfo(students, "åk2");
-	ClassInfo ca3 = new ClassInfo(students, "åk3");
+	ClassInfo ca1 = new ClassInfo(students, "Ã¥k1");
+	ClassInfo ca2 = new ClassInfo(students, "Ã¥k2");
+	ClassInfo ca3 = new ClassInfo(students, "Ã¥k3");
 
 	ArrayList<ClassInfo> list = new ArrayList<>();
 	list.add(ca1);

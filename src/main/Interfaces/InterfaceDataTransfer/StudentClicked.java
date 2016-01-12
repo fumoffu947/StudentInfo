@@ -1,4 +1,4 @@
-package main.InterfaceDataTransfer;
+package main.Interfaces.InterfaceDataTransfer;
 
 /**
  * Created by fumoffu on 2015-10-24.
