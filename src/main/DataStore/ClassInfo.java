@@ -1,4 +1,4 @@
-package main;
+package main.DataStore;
 
 import main.Comparators.StudentComparator;
 

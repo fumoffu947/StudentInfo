@@ -1,6 +1,6 @@
 package main.Comparators;
 
-import main.ClassInfo;
+import main.DataStore.ClassInfo;
 
 import java.util.Comparator;
 

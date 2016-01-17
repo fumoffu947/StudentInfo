@@ -1,6 +1,6 @@
-package main.InterfaceDataTransfer;
+package main.Interfaces.InterfaceDataTransfer;
 
-import main.Student;
+import main.DataStore.Student;
 
 /**
  * Created by fumoffu on 2015-10-22.
