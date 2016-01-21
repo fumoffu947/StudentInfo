@@ -1,0 +1,16 @@
+Show all the year classes // Done
+Create person and add to personlexicon // done
+create course // Done
+add students to course // done
+Page to show grade and summary for a course// Done
+create a year class // Done
+remove a yearClass // Done
+add class to a courseCreation //
+fixa så inte crete class försvinner om den inte skapas// Done
+fixa så det står om jag sapat en person eller inte //
+// fixa en initClass som skapar alla object från en .txt fil //
+fixa en class för att spara all information när mans tänger och när man göra stora ändringar //
+en person sida som man kan kolla vad som denna person går i för curser //
+fixa så att när man tar bort en class så tar inte fönstret och blir större än innan //
+fixa så att man kan söka efter bara studenter och bara lärare //
+lägg till när man tar bort en class att man måste verifiera det //

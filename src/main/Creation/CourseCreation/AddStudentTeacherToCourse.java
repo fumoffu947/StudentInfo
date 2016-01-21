@@ -43,7 +43,7 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
     private JTable teacherInCourseTable = new JTable(teacherInCourseTableModel);
     private JTable teacherSearchResultTable = new JTable(teacherSearchResultTableModel);
 
-    public AddStudentTeacherToCourse(PersonLexicon personLexicon, JMenuBar jMenuBar, RePackWindow rePackWindow, CourseGoalModel courseGoalModel) {
+    public AddStudentTeacherToCourse(PersonLexicon personLexicon, JMenuBar jMenuBar, RePackWindow rePackWindow,String courseName, CourseGoalModel courseGoalModel) {
 
         this.personLexicon = personLexicon;
         this.rePackWindow = rePackWindow;

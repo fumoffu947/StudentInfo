@@ -61,11 +61,13 @@ public class CreateYearClass implements main.Interfaces.Panel {
                 }
                 String name = className.getText();
 
-                clearMenuBar(jMenuBar);
-                rePackWindow.rePackWindow();
-
-                if (name.length() > 0) {
+                if (name.length() > 0 && !studentGroup.isEmpty()) {
                     addToYearHolderPage.addClass(new ClassInfo(studentGroup, name));
+                    clearMenuBar(jMenuBar);
+                    rePackWindow.rePackWindow();
+                }
+                else {
+                    studentGroup.clear();
                 }
             }
         });

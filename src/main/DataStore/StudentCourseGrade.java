@@ -1,7 +1,7 @@
 package main.DataStore;
 
 import main.DataStore.Lexicon.PersonLexicon;
-import main.Interfaces.RePackWindow;
+import main.Interfaces.*;
 
 import javax.swing.*;
 import javax.swing.event.CellEditorListener;
@@ -17,8 +17,9 @@ import java.util.List;
 
 /**
  * Created by phili on 2016-01-16.
+ * this page is the page where a courses Students and grade for the students are shown
  */
-public class StudentCourseGrade {
+public class StudentCourseGrade implements main.Interfaces.Panel {
 
     private final PersonLexicon personLexicon;
     private CourseInfo courseInfo;
@@ -197,6 +198,16 @@ public class StudentCourseGrade {
         summaryTableContainer.add(new JScrollPane(summaryTable));
         studentPages.add(summaryTableContainer);
         studentGradePage.add(summaryTableContainer);
+    }
+
+    @Override
+    public void clearMenuBar(JMenuBar jMenuBar) {
+
+    }
+
+    @Override
+    public void setupMenuBar(JMenuBar jMenuBar) {
+
     }
 
     public JPanel getPageHolder() {

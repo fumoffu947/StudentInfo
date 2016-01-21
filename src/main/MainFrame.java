@@ -10,6 +10,7 @@ import main.Interfaces.*;
 import main.Interfaces.InterfaceDataTransfer.AddToYearHolderPage;
 import main.Interfaces.InterfaceDataTransfer.StudentClicked;
 import main.Interfaces.PaneInterfaceSwitches.SwitchToAddStudentTeacherToCourse;
+import main.Interfaces.PaneInterfaceSwitches.SwitchToStudentCourseGrade;
 import main.Interfaces.Panel;
 
 import javax.swing.*;
@@ -25,13 +26,18 @@ import java.util.Collection;
  */
 public class MainFrame extends JFrame {
 
+    // interfaces needed to work
     private final AddToYearHolderPage addToYearHolderPage;
     private final StudentClicked studentClicked;
     private final SwitchToAddStudentTeacherToCourse switchToAddStudentTeacherToCourse;
     private RePackWindow rePackWindow;
-    private PersonLexicon personLexicon = new PersonLexicon();
     private YearHolderPage yearHolderPage;
+    private SwitchToStudentCourseGrade switchToStudentCourseGrade;
+
+    // classes with data needed
+    private PersonLexicon personLexicon = new PersonLexicon();
     private PanelHistoryStore panelHistoryStore = new PanelHistoryStore();
+    private CoursesPage coursesPage = new CoursesPage(new ArrayList<>(), switchToStudentCourseGrade);
     private JFrame mainFrame = this;
 
     public static void main(String[] args) {
@@ -51,8 +57,10 @@ public class MainFrame extends JFrame {
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.rePackWindow = () -> {
             mainFrame.setMinimumSize(mainFrame.getSize());
+            mainFrame.setMaximumSize(mainFrame.getSize());
             mainFrame.pack();
             mainFrame.repaint();
+            mainFrame.setMinimumSize(null);
             mainFrame.setMaximumSize(null);
         };
         this.addToYearHolderPage = new AddToYearHolderPage() {
@@ -69,8 +77,14 @@ public class MainFrame extends JFrame {
         };
         this.switchToAddStudentTeacherToCourse = new SwitchToAddStudentTeacherToCourse() {
             @Override
-            public void startAddStudentTeacherToCourse(String CourseName, CourseGoalModel courseGoalModel) {
-                setNewPage(new AddStudentTeacherToCourse(personLexicon,mainFrame.getJMenuBar(), rePackWindow, courseGoalModel));
+            public void startAddStudentTeacherToCourse(String courseName, CourseGoalModel courseGoalModel) {
+                setNewPage(new AddStudentTeacherToCourse(personLexicon,mainFrame.getJMenuBar(), rePackWindow,courseName, courseGoalModel));
+            }
+        };
+        this.switchToStudentCourseGrade = new SwitchToStudentCourseGrade() {
+            @Override
+            public void switchToCourseGradePage(CourseInfo courseInfo) {
+                setNewPage(new StudentCourseGrade(courseInfo, personLexicon, rePackWindow));
             }
         };
 
@@ -181,7 +195,7 @@ public class MainFrame extends JFrame {
         list.add(ca3);
 
 
-        yearHolderPage = new YearHolderPage(list, studentClicked);
+        yearHolderPage = new YearHolderPage(list, studentClicked, rePackWindow);
     }
 
     private void addExampleTextFields() {
