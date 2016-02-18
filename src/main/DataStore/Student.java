@@ -23,8 +23,8 @@ public class Student implements Person {
     public Student(final List<String> name, final String lastName, final int firstName, final String cellPhoneNumber,
 				   final String emailAddress, int ID) {
 
-		assert name.size() > 0: "To wew names was given.";
-		assert firstName > -1: "Firstname can't be a negative number";
+		assert name.size() > 0: "To few names was given.";
+		assert firstName > -1: "First name can't be a negative number";
 
 		this.name = name;
 		this.lastName = lastName;
@@ -63,6 +63,10 @@ public class Student implements Person {
     public String getFirstName() {
 	return name.get(firstName);
     }
+
+	public int getFirstNameNumber() {
+		return firstName;
+	}
 
     public List<String> getName() {
 	return name;

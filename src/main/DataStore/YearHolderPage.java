@@ -1,6 +1,7 @@
 package main.DataStore;
 
 import main.Comparators.ClassInfoComparator;
+import main.DataStore.Lexicon.PersonLexicon;
 import main.Interfaces.*;
 import main.Interfaces.InterfaceDataTransfer.StudentClicked;
 
@@ -10,7 +11,12 @@ import javax.swing.event.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -24,21 +30,75 @@ public class YearHolderPage implements main.Interfaces.Panel {
     private StudentClicked studentClicked;
     private List<DefaultTableModel> tableModels = new ArrayList<>();
     private int tableNr = 0;
+    private boolean startSetup = true;
 
 
     public YearHolderPage(final List<ClassInfo> classes, StudentClicked studentClicked, RePackWindow rePackWindow) {
         this.classes = classes;
+        classes.add(0,new ClassInfo(new ArrayList<Student>(),"No Class"));
         this.classes.sort(new ClassInfoComparator());
         this.studentClicked = studentClicked;
         this.rePackWindow = rePackWindow;
         setupPanel();
     }
 
-    private void setupPanel() {
-        for (ClassInfo aClass : classes) {
+    public YearHolderPage(BufferedInputStream fileReader, PersonLexicon personLexicon, StudentClicked studentClicked, RePackWindow rePackWindow) {
+        this.classes = new ArrayList<>();
+        classes.add(new ClassInfo(new ArrayList<Student>(),"No Class"));
+        this.studentClicked = studentClicked;
+        this.rePackWindow = rePackWindow;
 
-            addClassToPage(aClass);
+        try {
+            int character = fileReader.read();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+            while(character != -1) {
+                if ('[' == character) {
+                    if (byteArrayOutputStream.size() != 0) {
+                        String personString = new String(Base64.getDecoder().decode(byteArrayOutputStream.toByteArray()));
+                        loadGroupFromString(personString.split(","), personLexicon);
+                        byteArrayOutputStream.reset();
+                    }
+                }else {
+                    byteArrayOutputStream.write(character);
+                }
+
+                character = fileReader.read();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+
+        setupPanel();
+    }
+
+    private void loadGroupFromString(String[] groupsInfo, PersonLexicon personLexicon) {
+        String groupName = groupsInfo[0];
+        ArrayList<Student> students = new ArrayList<>();
+        for (int personIndex = 1; personIndex < groupsInfo.length; personIndex++) {
+            String[] personInfo = groupsInfo[personIndex].split(" ");
+            Collection<Person> foundPersons = personLexicon.getPersonsByName(personInfo[0]);
+            for (Person person : foundPersons) {
+                if (person.getID() == Integer.parseInt(personInfo[1]) && !person.isTeacher()) {
+                    students.add((Student) person);
+                }
+            }
+        }
+        System.out.println("adding a course");
+        if (!groupName.equals("No Class")) {
+            classes.add(new ClassInfo(students, groupName));
+        }
+    }
+
+    private void setupPanel() {
+        System.out.println("setting up the panel");
+        for (ClassInfo aClass : classes) {
+            if (!aClass.getClassName().equals("No Class")) {
+                addClassToPage(aClass);
+            }
+        }
+        startSetup = false;
 
 
         pageHolder.add(new JScrollPane(classContainer));
@@ -101,10 +161,26 @@ public class YearHolderPage implements main.Interfaces.Panel {
             }
         });
         tableNr++;
+        if (!startSetup) {
+            classes.add(aClass);
+        }
+    }
+
+    public ClassInfo getClassInfoByName(String name) {
+        for (ClassInfo classInfo : classes) {
+            if (classInfo.getClassName().equals(name)) {
+                return classInfo;
+            }
+        }
+        return null;
     }
 
     public JPanel getPageHolder() {
         return pageHolder;
+    }
+
+    public List<ClassInfo> getClasses() {
+        return classes;
     }
 
     @Override

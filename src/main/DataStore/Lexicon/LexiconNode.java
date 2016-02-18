@@ -75,4 +75,16 @@ public class LexiconNode {
     public  StudentGrade getGradeByPersonCourse(Person person, String courseName) {
         return grades.get(person.getID()).get(courseName);
     }
+
+    public HashMap<Character, LexiconNode> getChildren() {
+        return children;
+    }
+
+    public HashMap<String, Collection<Person>> getNamesMap() {
+        return namesMap;
+    }
+
+    public HashMap<Integer, HashMap<String, StudentGrade>> getGrades() {
+        return grades;
+    }
 }

@@ -18,4 +18,10 @@ public class StudentGrade {
     public ArrayList<ArrayList<Integer>> getGrades() {
         return grades;
     }
+
+    public boolean setValueAt(int row, int col, int value) {
+        int oldValue = grades.get(row).get(col);
+        grades.get(row).set(col,value);
+        return oldValue == grades.get(row).get(col);
+    }
 }

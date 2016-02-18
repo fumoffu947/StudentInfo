@@ -7,4 +7,6 @@ import main.DataStore.CourseInfo;
  */
 public interface SwitchToStudentCourseGrade {
     void switchToCourseGradePage(CourseInfo courseInfo);
+
+    void switchToCourseGradePageAndAddCourseInfo(CourseInfo courseInfo);
 }

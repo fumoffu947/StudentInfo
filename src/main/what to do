@@ -5,12 +5,20 @@ add students to course // done
 Page to show grade and summary for a course// Done
 create a year class // Done
 remove a yearClass // Done
-add class to a courseCreation //
+add class to a courseCreation // Done
 fixa så inte crete class försvinner om den inte skapas// Done
-fixa så det står om jag sapat en person eller inte //
-// fixa en initClass som skapar alla object från en .txt fil //
-fixa en class för att spara all information när mans tänger och när man göra stora ändringar //
+fixa så det står om jag sapat en person eller inte // Done
+// fixa en initClass som skapar alla object från en .txt fil // Done
+fixa en class för att spara all information när mans tänger och när man göra stora ändringar // Done
 en person sida som man kan kolla vad som denna person går i för curser //
 fixa så att när man tar bort en class så tar inte fönstret och blir större än innan //
-fixa så att man kan söka efter bara studenter och bara lärare //
+fixa så att man kan söka efter bara studenter och bara lärare // Done
 lägg till när man tar bort en class att man måste verifiera det //
+
+
+
+fixa så att man behöver bara skriva ett mål // Done
+fixa så att rutan längst upp till höger ej går att skriva i och är mörk// Done (ej mörk)
+fixa så att det står att man ska skriva i ett namn på kursen // Done
+fixa så att man får ett felmedelande (i courseCreation) om vad som är fel för att man ska komma vidare // Done (tillräkligt bra , kan fixa så den är mer specifik)
+fixa så att Id nummret sparas och skrivs ut så att man håller reda på vilka som faktist har använts (spara de som inte används som finn emellan de som existerar och det nummer som nästa id ska börja på)//

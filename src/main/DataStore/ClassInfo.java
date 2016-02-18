@@ -38,4 +38,8 @@ public class ClassInfo  {
     public void setClassName(final String className) {
 	this.className = className;
     }
+
+    public boolean removeClassInfoStudent(Student student) {
+        return students.remove(student);
+    }
 }

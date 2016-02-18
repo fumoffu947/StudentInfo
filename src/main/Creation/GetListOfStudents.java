@@ -4,8 +4,10 @@ import main.Creation.CourseCreation.MyTableModel;
 import main.DataStore.ClassInfo;
 import main.DataStore.Lexicon.PersonLexicon;
 import main.DataStore.Student;
+import main.DataStore.StudentCourseGrade;
 import main.Interfaces.*;
 import main.Interfaces.InterfaceDataTransfer.AddToYearHolderPage;
+import main.Interfaces.InterfaceDataTransfer.SwitchToGivenPanel;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -18,13 +20,14 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Created by fumoffu on 2015-10-24.
+ * Created by phili on 2016-02-17.
  */
-public class CreateYearClass implements main.Interfaces.Panel {
+public class GetListOfStudents implements main.Interfaces.Panel {
 
-    private final AddToYearHolderPage addToYearHolderPage;
     private final RePackWindow rePackWindow;
-    private JButton continueButton;
+    private final SwitchToGivenPanel switchToGivenPanel;
+    private final StudentCourseGrade studentCourseGrade;
+    private JButton chooseStudents;
     private List<Student> studentGroup = new ArrayList<>();
     private PersonLexicon personLexicon;
 
@@ -33,62 +36,60 @@ public class CreateYearClass implements main.Interfaces.Panel {
 
     private MyTableModel searchResultTableModel = new MyTableModel();
     private MyTableModel inClassTableModel = new MyTableModel();
-    private JTextField className = new JTextField();
 
     private JTable inCourseTable = new JTable(inClassTableModel);
     private JTable searchResultTable = new JTable(searchResultTableModel);
 
-    public CreateYearClass(PersonLexicon personLexicon, RePackWindow rePackWindow,
-                           JMenuBar jMenuBar, AddToYearHolderPage addToYearHolderPage) {
+    public GetListOfStudents(PersonLexicon personLexicon, RePackWindow rePackWindow,
+                             JMenuBar jMenuBar, SwitchToGivenPanel switchToGivenPanel, StudentCourseGrade studentCourseGrade) {
         this.personLexicon = personLexicon;
         this.rePackWindow = rePackWindow;
-        this.addToYearHolderPage = addToYearHolderPage;
+        this.switchToGivenPanel = switchToGivenPanel;
+        this.studentCourseGrade = studentCourseGrade;
 
-        setupMenuButtons(rePackWindow, jMenuBar, addToYearHolderPage);
+        setupMenuButtons(jMenuBar);
 
         studentSearchFieldBoxSetup(pageHolder);
         studentSearchResultBoxSetup(pageHolder);
         studentsInCourseBoxSetup(pageHolder);
+
+        rePackWindow.rePackWindow();
     }
 
-    private void setupMenuButtons(final RePackWindow rePackWindow, final JMenuBar jMenuBar, final AddToYearHolderPage addToYearHolderPage) {
-        this.continueButton = new JButton();
-        continueButton.setAction(new AbstractAction() {
+    private void setupMenuButtons(final JMenuBar jMenuBar) {
+        this.chooseStudents = new JButton();
+        chooseStudents.setAction(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 for (int row = 0; row < inClassTableModel.getRowCount(); row++) {
                     studentGroup.add((Student) inClassTableModel.getValueAt(row,0));
                 }
-                String name = className.getText();
+                if (!studentGroup.isEmpty()) {
+                    studentCourseGrade.addStudentsToCourse(studentGroup);
+                    switchToGivenPanel.switchTo(studentCourseGrade);
+                }
 
-                if (name.length() > 0 && !studentGroup.isEmpty()) {
-                    addToYearHolderPage.addClass(new ClassInfo(studentGroup, name));
-                    clearMenuBar(jMenuBar);
-                    rePackWindow.rePackWindow();
-                }
-                else {
-                    studentGroup.clear();
-                }
             }
         });
-        continueButton.setText("Create class");
-        jMenuBar.add(continueButton);
+        chooseStudents.setText("Choose students");
+        jMenuBar.add(chooseStudents);
+        rePackWindow.rePackWindow();
     }
 
     public void clearMenuBar(JMenuBar jMenuBar) {
-        jMenuBar.remove(continueButton);
+        jMenuBar.remove(chooseStudents);
     }
 
     @Override
     public void setupMenuBar(JMenuBar jMenuBar) {
-        setupMenuButtons(rePackWindow, jMenuBar, addToYearHolderPage);
+        setupMenuButtons(jMenuBar);
     }
 
     private void updateSearchResultTableModel(JTextField teacherSearchField, DefaultTableModel tableModel, String whichUpdate) {
         System.out.println(whichUpdate + " " + personLexicon.containsPrefix(teacherSearchField.getText()));
         Collection<Person> persons = null;
         if (personLexicon.containsPrefix(teacherSearchField.getText())) {
-            persons = personLexicon.getPersonByNameAndFunction(teacherSearchField.getText(),(Person p)->!p.isTeacher());
+            persons = personLexicon.getPersonsByName(teacherSearchField.getText());
         }
         if (persons != null && !persons.isEmpty()) {
             clearTableModel(tableModel);
@@ -180,7 +181,7 @@ public class CreateYearClass implements main.Interfaces.Panel {
 
         GridBagConstraints studentTableConstraints = new GridBagConstraints();
         studentTableConstraints.gridx = 0;
-        studentTableConstraints.gridy = 2;
+        studentTableConstraints.gridy = 1;
         studentTableConstraints.fill = GridBagConstraints.BOTH;
         studentTableConstraints.weightx = 1.0;
         studentTableConstraints.weighty = 1.0;
@@ -188,18 +189,6 @@ public class CreateYearClass implements main.Interfaces.Panel {
         inClassTableModel.addColumn("RemoveBox");
         container.add(new JScrollPane(inCourseTable), studentTableConstraints);
 
-        GridBagConstraints classNameTextFieldConstraints = new GridBagConstraints();
-        classNameTextFieldConstraints.gridx = 0;
-        classNameTextFieldConstraints.gridy = 1;
-        classNameTextFieldConstraints.fill = GridBagConstraints.HORIZONTAL;
-        classNameTextFieldConstraints.weightx = 1.0;
-        JPanel classNameContainer = new JPanel();
-        classNameContainer.setLayout(new BoxLayout(classNameContainer, BoxLayout.Y_AXIS));
-        JTextField comp = new JTextField("Class name");
-        comp.setEditable(false);
-        classNameContainer.add(comp);
-        classNameContainer.add(className);
-        container.add(classNameContainer, classNameTextFieldConstraints);
     }
 
     private void studentSearchResultBoxSetup(JPanel container) {

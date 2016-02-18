@@ -1,8 +1,9 @@
 package main.Creation.CourseCreation;
 
-import main.DataStore.CourseGoalModel;
+import main.DataStore.*;
 import main.DataStore.Lexicon.PersonLexicon;
 import main.Interfaces.*;
+import main.Interfaces.PaneInterfaceSwitches.SwitchToStudentCourseGrade;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -10,7 +11,9 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by philip on 2016-01-13.
@@ -18,6 +21,9 @@ import java.util.Collection;
  */
 public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
 
+    private final ClassInfo classInfo;
+    private final String courseName;
+    private final SwitchToStudentCourseGrade switchToStudentCourseGrade;
     /**
      * behöver en  courseData/info class som behöver skapas
      * en gridBagLayout som ska ha 2 fält
@@ -43,11 +49,16 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
     private JTable teacherInCourseTable = new JTable(teacherInCourseTableModel);
     private JTable teacherSearchResultTable = new JTable(teacherSearchResultTableModel);
 
-    public AddStudentTeacherToCourse(PersonLexicon personLexicon, JMenuBar jMenuBar, RePackWindow rePackWindow,String courseName, CourseGoalModel courseGoalModel) {
+    public AddStudentTeacherToCourse(PersonLexicon personLexicon, JMenuBar jMenuBar, RePackWindow rePackWindow,
+                                     String courseName, CourseGoalModel courseGoalModel, ClassInfo classInfo,
+                                     SwitchToStudentCourseGrade switchToStudentCourseGrade) {
 
         this.personLexicon = personLexicon;
         this.rePackWindow = rePackWindow;
         this.courseGoalModel = courseGoalModel;
+        this.classInfo = classInfo;
+        this.courseName = courseName;
+        this.switchToStudentCourseGrade = switchToStudentCourseGrade;
         setupMenuButtons(jMenuBar, rePackWindow);
 
         GridBagLayout studentGridBagLayout = new GridBagLayout();
@@ -92,11 +103,37 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 clearMenuBar(jMenuBar);
+                ArrayList<Teacher> teachers = new ArrayList<Teacher>();
+                for (int teacherIndex = 0; teacherIndex < teacherInCourseTableModel.getRowCount(); teacherIndex++) {
+                    teachers.add((Teacher) teacherInCourseTableModel.getValueAt(teacherIndex,0));
+                }
+                ArrayList<Student> students = new ArrayList<Student>();
+                for (int studentIndex = 0; studentIndex < studentInCourseTableModel.getRowCount(); studentIndex++) {
+                    students.add((Student) studentInCourseTableModel.getValueAt(studentIndex,0));
+                }
+
+                insertNewGradeToCourse(classInfo.getStudents());
+                insertNewGradeToCourse(students);
+
+                switchToStudentCourseGrade.switchToCourseGradePageAndAddCourseInfo(new CourseInfo(classInfo,students,courseName,teachers,courseGoalModel));
                 rePackWindow.rePackWindow();
             }
         });
         continueButton.setText("Add to course");
         jMenuBar.add(continueButton);
+    }
+
+    private void insertNewGradeToCourse(List<Student> studentList) {
+        for(int classStudentIndex = 0; classStudentIndex < studentList.size(); classStudentIndex++) {
+            ArrayList<ArrayList<Integer>> grade = new ArrayList<>();
+            for (int gradeRow = 0; gradeRow < courseGoalModel.getGoals().size(); gradeRow++) {
+                grade.add(new ArrayList<>());
+                for (int gradeCol = 0; gradeCol < courseGoalModel.getPartGoals().size(); gradeCol++) {
+                    grade.get(gradeRow).add(0);
+                }
+            }
+            personLexicon.insertStudentGrade(studentList.get(classStudentIndex),new StudentGrade(grade),courseName);
+        }
     }
 
     private void teacherSearchFieldBoxSetup(JPanel container) {
@@ -115,12 +152,12 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
         teacherSearchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                updateSearchResultTableModel(teacherSearchField, teacherSearchResultTableModel, "insertUpdate");
+                updateSearchResultTableModel(teacherSearchField, (Person p)->p.isTeacher(), teacherSearchResultTableModel, "insertUpdate");
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                updateSearchResultTableModel(teacherSearchField, teacherSearchResultTableModel, "removeUpdate");
+                updateSearchResultTableModel(teacherSearchField, (Person p)->p.isTeacher(), teacherSearchResultTableModel, "removeUpdate");
             }
 
             @Override
@@ -153,11 +190,11 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
         container.add(teacherSearchFieldButtonContainer, teacherSearchContainerConstraints);
     }
 
-    private void updateSearchResultTableModel(JTextField teacherSearchField, DefaultTableModel tableModel, String whichUpdate) {
+    private void updateSearchResultTableModel(JTextField teacherSearchField,PersonSearchFunction func, DefaultTableModel tableModel, String whichUpdate) {
         System.out.println(whichUpdate + " " + personLexicon.containsPrefix(teacherSearchField.getText()));
         Collection<Person> persons = null;
         if (personLexicon.containsPrefix(teacherSearchField.getText())) {
-            persons = personLexicon.getPersonsByName(teacherSearchField.getText());
+            persons = personLexicon.getPersonByNameAndFunction(teacherSearchField.getText(), func);
         }
         if (persons != null && !persons.isEmpty()) {
             clearTableModel(tableModel);
@@ -261,12 +298,12 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
         studentSearchField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                updateSearchResultTableModel(studentSearchField, studentSearchResultTableModel, "insertUpdate");
+                updateSearchResultTableModel(studentSearchField,(Person p)->!p.isTeacher(), studentSearchResultTableModel, "insertUpdate");
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                updateSearchResultTableModel(studentSearchField, studentSearchResultTableModel, "removeUpdate");
+                updateSearchResultTableModel(studentSearchField,(Person p)->!p.isTeacher(), studentSearchResultTableModel, "removeUpdate");
             }
 
             @Override
@@ -353,15 +390,17 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
                 for (int row = studentSearchResultTableModel.getRowCount() -1; row > -1; row--) {
                     boolean alreadyInCourse = false;
                     if ((boolean) studentSearchResultTableModel.getValueAt(row,1)) {
-                        for (int inCourseRow = 0; inCourseRow < studentInCourseTableModel.getRowCount(); inCourseRow++) {
-                            if (((Person)studentInCourseTableModel.getValueAt(inCourseRow,0)).getID() == ((Person)studentSearchResultTableModel.getValueAt(row,0)).getID()) {
-                                alreadyInCourse = true;
+                        if (classInfo == null || !classInfo.getStudents().contains(studentSearchResultTableModel.getValueAt(row, 0))){
+                            for (int inCourseRow = 0; inCourseRow < studentInCourseTableModel.getRowCount(); inCourseRow++) {
+                                if (((Person) studentInCourseTableModel.getValueAt(inCourseRow, 0)).getID() == ((Person) studentSearchResultTableModel.getValueAt(row, 0)).getID()) {
+                                    alreadyInCourse = true;
+                                }
                             }
-                        }
                         if (!alreadyInCourse) {
                             studentInCourseTableModel.addRow(new Object[]{studentSearchResultTableModel.getValueAt(row, 0), false});
                         }
                         studentSearchResultTableModel.removeRow(row);
+                        }
                     }
                 }
             }

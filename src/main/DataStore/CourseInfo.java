@@ -67,6 +67,14 @@ public class CourseInfo {
         return this.teachers.add(teacher);
     }
 
+    public boolean removeStudent(Student student) {
+        return classInfo.removeClassInfoStudent(student);
+    }
+
+    public boolean removeOtherEnlistedStudent(Student student) {
+        return otherEnlistedStudents.remove(student);
+    }
+
     public CourseGoalModel getCourseGoalModel() {
         return courseGoalModel;
     }
