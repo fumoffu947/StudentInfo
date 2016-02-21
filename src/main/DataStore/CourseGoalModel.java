@@ -7,19 +7,25 @@ import java.util.List;
  */
 public class CourseGoalModel {
 
-    private List<String> goals;
-    private List<String> partGoals;
+    private final List<List<Integer>> maxPoits;
+    private List<String> objective;
+    private List<String> milestone;
 
-    public CourseGoalModel(List<String> goals, List<String> partGoals) {
-        this.goals = goals;
-        this.partGoals = partGoals;
+    public CourseGoalModel(List<String> objective, List<String> milestone, List<List<Integer>> maxPoints) {
+        this.objective = objective;
+        this.milestone = milestone;
+        this.maxPoits = maxPoints;
     }
 
-    public List<String> getGoals() {
-        return goals;
+    public List<List<Integer>> getMaxPoits() {
+        return maxPoits;
     }
 
-    public List<String> getPartGoals() {
-        return partGoals;
+    public List<String> getObjective() {
+        return objective;
+    }
+
+    public List<String> getMilestone() {
+        return milestone;
     }
 }

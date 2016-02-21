@@ -126,9 +126,9 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
     private void insertNewGradeToCourse(List<Student> studentList) {
         for(int classStudentIndex = 0; classStudentIndex < studentList.size(); classStudentIndex++) {
             ArrayList<ArrayList<Integer>> grade = new ArrayList<>();
-            for (int gradeRow = 0; gradeRow < courseGoalModel.getGoals().size(); gradeRow++) {
+            for (int gradeRow = 0; gradeRow < courseGoalModel.getObjective().size(); gradeRow++) {
                 grade.add(new ArrayList<>());
-                for (int gradeCol = 0; gradeCol < courseGoalModel.getPartGoals().size(); gradeCol++) {
+                for (int gradeCol = 0; gradeCol < courseGoalModel.getMilestone().size(); gradeCol++) {
                     grade.get(gradeRow).add(0);
                 }
             }

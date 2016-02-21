@@ -10,6 +10,7 @@ import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An example to get me going
@@ -142,29 +143,45 @@ public class CreateCourse implements main.Interfaces.Panel {
 
 				String name = courseNameWriteField.getText();
 
-				ArrayList<String> goals = new ArrayList<>();
-				ArrayList<String> activities = new ArrayList<>();
+				ArrayList<String> objectives = new ArrayList<>();
+				ArrayList<String> milestone = new ArrayList<>();
+				List<List<Integer>> maxPointModel = new ArrayList<List<Integer>>();
 
 				if (table.getColumnCount() > 1 && table.getRowCount() > 1) {
 
 					for (int col = 1; col < table.getColumnCount(); col++) {
 						String arg = (String) table.getValueAt(0, col);
-						if (arg != null && arg.length() > 0) {
-							activities.add(arg);
+						if (arg != null && !arg.isEmpty()) {
+							milestone.add(arg);
 						}
 					}
 
 					for (int row = 1; row < table.getRowCount(); row++) {
 						String arg = (String) table.getValueAt(row, 0);
-						if (arg != null && arg.length() > 0) {
-							goals.add(arg);
+						if (arg != null && !arg.isEmpty()) {
+							objectives.add(arg);
 						}
 					}
+
+					for (int row = 1; row < table.getRowCount(); row++) {
+						maxPointModel.add(new ArrayList<>());
+						for (int col = 1; col < table.getColumnCount(); col++) {
+							String arg = (String) table.getValueAt(row, col);
+							if (arg != null && !arg.isEmpty()) {
+								maxPointModel.get(row).add(Integer.parseInt(arg));
+							}
+							else {
+								maxPointModel.get(row).add(0);
+							}
+						}
+					}
+
+
 				}
-				if (!activities.isEmpty() && !goals.isEmpty() && name.length() > 0) {
+				if (!milestone.isEmpty() && !objectives.isEmpty() && !name.isEmpty()) {
 					clearMenuBar(jMenuBar);
 					rePackWindow.rePackWindow();
-					switchPanel.startChooseGroupPage(name, new CourseGoalModel(goals, activities));
+					switchPanel.startChooseGroupPage(name, new CourseGoalModel(objectives, milestone, maxPointModel));
 				}
 				else {
 					String newLine = System.getProperty("line.separator");

@@ -76,6 +76,16 @@ public class CoursesPage implements main.Interfaces.Panel {
         List<String> goals = Arrays.asList(gradeModelArray[0].split(","));
         List<String> parGoals = Arrays.asList(gradeModelArray[1].split(","));
 
+        String[] maxPointsArray = gradeModelArray[2].split(",");
+        List<List<Integer>> maxPointModel = new ArrayList<>();
+
+        for (int maxPointRowIndex = 0; maxPointRowIndex < goals.size(); maxPointRowIndex++) {
+            maxPointModel.add(new ArrayList<>());
+            for (int maxPointColIndex = 0; maxPointColIndex < parGoals.size() * 3; maxPointColIndex++) {
+                        maxPointModel.get(maxPointRowIndex).add(Integer.parseInt(maxPointsArray[maxPointRowIndex*goals.size()+maxPointColIndex]));
+            }
+        }
+
         // find and add teachers to an ArrayList
         for (int teacherIndex = 0; teacherIndex < teachers.length; teacherIndex++) {
             String[] personInfo = teachers[teacherIndex].split(" ");
@@ -98,7 +108,7 @@ public class CoursesPage implements main.Interfaces.Panel {
             }
         }
 
-        courses.add(new CourseInfo(classInfo,otherEnlistedArrayList,courseName,teacherArrayList,new CourseGoalModel(goals,parGoals)));
+        courses.add(new CourseInfo(classInfo,otherEnlistedArrayList,courseName,teacherArrayList,new CourseGoalModel(goals,parGoals,maxPointModel)));
     }
 
     private void setupTableInfo(final List<CourseInfo> courses, final SwitchToStudentCourseGrade switchToStudentCourseGrade) {

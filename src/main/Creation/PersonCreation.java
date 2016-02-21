@@ -1,6 +1,7 @@
 package main.Creation;
 
 import main.DataStore.Lexicon.PersonLexicon;
+import main.DataStore.SettingsLoader;
 import main.DataStore.Student;
 import main.DataStore.Teacher;
 import main.Interfaces.*;
@@ -17,7 +18,7 @@ import java.util.Collection;
  */
 public class PersonCreation implements main.Interfaces.Panel
 {
-    private int nextID;
+    private final SettingsLoader settingsLoader;
     private JPanel pageHolder = new JPanel();
     private JTextField nameField = new JTextField(20);
     private JTextField lastNameField = new JTextField(20);
@@ -25,8 +26,8 @@ public class PersonCreation implements main.Interfaces.Panel
     private JTextField email = new JTextField(20);
     private JCheckBox isTeacherCheckBox = new JCheckBox();
 
-    public PersonCreation(StudentCreationReturn scr, int nextID, PersonLexicon personLexicon) {
-        this.nextID = nextID;
+    public PersonCreation(StudentCreationReturn scr, PersonLexicon personLexicon, SettingsLoader settingsLoader) {
+        this.settingsLoader = settingsLoader;
         pageHolder.setAlignmentX(Component.LEFT_ALIGNMENT);
         JPanel nameContainer = new JPanel();
         JPanel surnameContainer = new JPanel();
@@ -79,6 +80,12 @@ public class PersonCreation implements main.Interfaces.Panel
         createButton.setAction(new AbstractAction()
         {
             @Override public void actionPerformed(final ActionEvent e) {
+                boolean gotScatterd = true;
+                int nextID = settingsLoader.getAScatterdIDNumber();
+                if (nextID == -1) {
+                    nextID = settingsLoader.getLastIDNumber();
+                    gotScatterd = false;
+                }
                 String[] namesArray = nameField.getText().split(" ");
                 ArrayList<String> names = new ArrayList<>();
                 for (String name : namesArray) {
@@ -111,8 +118,10 @@ public class PersonCreation implements main.Interfaces.Panel
                             boolean successfulInsert = personLexicon.insertPersonToLexicon(student.getFirstName(), student);
                             if (successfulInsert) {
                                 scr.returnStudent(student);
-                                nextID++;
-                                JOptionPane.showMessageDialog(null, "A student by name : "+student.toString()+" was created.","Student Creation",JOptionPane.INFORMATION_MESSAGE);
+                                if (!gotScatterd) {
+                                    settingsLoader.setLastIDNumber(nextID+1);
+                                }
+                                JOptionPane.showMessageDialog(null, "A student by name : "+student+" was created.","Student Creation",JOptionPane.INFORMATION_MESSAGE);
                             }else {
                                 JOptionPane.showMessageDialog(null,"An error occurred and the student was not created.",
                                         "Student Creation",JOptionPane.WARNING_MESSAGE);
@@ -122,7 +131,9 @@ public class PersonCreation implements main.Interfaces.Panel
                     } else {
                         personLexicon.insertPersonToLexicon(student.getFirstName(), student);
                         scr.returnStudent(student);
-                        nextID++;
+                        if (!gotScatterd) {
+                            settingsLoader.setLastIDNumber(nextID+1);
+                        }
                     }
                 }else {
                     String newLine = System.getProperty("line.separator");

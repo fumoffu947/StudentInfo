@@ -56,6 +56,7 @@ public class MainFrame extends JFrame {
     private PersonLexicon personLexicon = new PersonLexicon();
     private PanelHistoryStore panelHistoryStore = new PanelHistoryStore();
     private CoursesPage coursesPage;
+    private SettingsLoader settingsLoader;
     private JFrame mainFrame = this;
 
     public static void main(String[] args) {
@@ -78,7 +79,7 @@ public class MainFrame extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 super.windowClosing(e);
-                DataSaver dataSaver = new DataSaver(personLexicon,yearHolderPage,coursesPage);
+                DataSaver dataSaver = new DataSaver(personLexicon,yearHolderPage,coursesPage, settingsLoader);
                 dataSaver.run();
             }
         });
@@ -141,6 +142,12 @@ public class MainFrame extends JFrame {
                         courseGoalModel, mainFrame.getJMenuBar()));
             }
         };
+
+        try {
+            settingsLoader = new SettingsLoader(new BufferedInputStream(new FileInputStream("content/Settings.txt")));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
         try {
             personLexicon = new PersonLexicon(new BufferedInputStream(new FileInputStream("content/Students.txt")));
@@ -221,9 +228,9 @@ public class MainFrame extends JFrame {
         //this.setContentPane(addStudentTeacherToCourse.getPageHolder());
 
 
-        ClassInfo cI = new ClassInfo(new ArrayList<Student>(coll),"Test");
-        CourseGoalModel cGM = new CourseGoalModel(new ArrayList<String>(Arrays.asList("test1","test2","test3")), new ArrayList<>(Arrays.asList("partgoal1", "partgoal2","partgoal1", "partgoal2")));
-        CourseInfo c = new CourseInfo(cI,new ArrayList<Student>(),"Test",new ArrayList<Teacher>(),cGM);
+        //ClassInfo cI = new ClassInfo(new ArrayList<Student>(coll),"Test");
+        //CourseGoalModel cGM = new CourseGoalModel(new ArrayList<String>(Arrays.asList("test1","test2","test3")), new ArrayList<>(Arrays.asList("partgoal1", "partgoal2","partgoal1", "partgoal2")));
+        //CourseInfo c = new CourseInfo(cI,new ArrayList<Student>(),"Test",new ArrayList<Teacher>(),cGM);
 
         //yearHolderPage.addClassToPage(cI);
         //coursesPage.addCourse(c);
@@ -247,21 +254,25 @@ public class MainFrame extends JFrame {
             }
         }
         if (contentDir.exists()) {
-            File studentsFile = new File("content/Students.txt");
-            File groupsFile = new File("content/Groups.txt");
-            File coursesFile = new File("content/Courses.txt");
             try {
+                File studentsFile = new File("content/Students.txt");
                 if (!studentsFile.exists()) {
                     studentsFile.createNewFile();
                     System.out.println("Students.txt created");
                 }
+                File groupsFile = new File("content/Groups.txt");
                 if (!groupsFile.exists()) {
                     groupsFile.createNewFile();
                     System.out.println("Groups.txt created");
                 }
+                File coursesFile = new File("content/Courses.txt");
                 if (!coursesFile.exists()) {
                     coursesFile.createNewFile();
                     System.out.println("course.txt created");
+                }
+                File settingsFile = new File("content/Settings.txt");
+                if (!settingsFile.exists()) {
+                    settingsFile.createNewFile();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -443,7 +454,7 @@ public class MainFrame extends JFrame {
         studentCreation.setAction(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                PersonCreation sc = new PersonCreation(student -> System.out.println(student.getFirstName()), 0, personLexicon);
+                PersonCreation sc = new PersonCreation(student -> System.out.println(student.getFirstName()),personLexicon, settingsLoader);
                 setNewPage(sc);
             }
         });

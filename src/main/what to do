@@ -13,7 +13,7 @@ fixa en class för att spara all information när mans tänger och när man gör
 en person sida som man kan kolla vad som denna person går i för curser //
 fixa så att när man tar bort en class så tar inte fönstret och blir större än innan //
 fixa så att man kan söka efter bara studenter och bara lärare // Done
-lägg till när man tar bort en class att man måste verifiera det //
+lägg till när man tar bort en class att man måste verifiera det // (optional, releas in ver 1.1)
 
 
 
@@ -21,4 +21,7 @@ fixa så att man behöver bara skriva ett mål // Done
 fixa så att rutan längst upp till höger ej går att skriva i och är mörk// Done (ej mörk)
 fixa så att det står att man ska skriva i ett namn på kursen // Done
 fixa så att man får ett felmedelande (i courseCreation) om vad som är fel för att man ska komma vidare // Done (tillräkligt bra , kan fixa så den är mer specifik)
-fixa så att Id nummret sparas och skrivs ut så att man håller reda på vilka som faktist har använts (spara de som inte används som finn emellan de som existerar och det nummer som nästa id ska börja på)//
+fixa så att Id nummret sparas och skrivs ut så att man håller reda på vilka som faktist har använts (spara de som inte används som finn emellan de som existerar och det nummer som nästa id ska börja på)// done
+
+fixa så att man kan ta bort personer från lexicon //
+lägg till en lista i en course om man tar bort en person från en grup så man ej behöver ta bort dem från gruppen utan bar kan skita i att ha med personen //

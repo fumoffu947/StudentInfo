@@ -3,8 +3,8 @@ package main.DataStore;
 import main.DataStore.Lexicon.PersonLexicon;
 
 import java.io.BufferedOutputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
@@ -17,11 +17,13 @@ public class DataSaver implements Runnable {
     private final PersonLexicon personLexicon;
     private final YearHolderPage yearHolderPage;
     private final CoursesPage coursesPage;
+    private final SettingsLoader settingsLoader;
 
-    public DataSaver(PersonLexicon personLexicon, YearHolderPage yearHolderPage, CoursesPage coursesPage) {
+    public DataSaver(PersonLexicon personLexicon, YearHolderPage yearHolderPage, CoursesPage coursesPage, SettingsLoader settingsLoader) {
         this.personLexicon = personLexicon;
         this.yearHolderPage = yearHolderPage;
         this.coursesPage = coursesPage;
+        this.settingsLoader = settingsLoader;
     }
 
     @Override
@@ -123,18 +125,31 @@ public class DataSaver implements Runnable {
                 // write the model for the goals for the course
                 CourseGoalModel courseGoalModel = courses.get(courseIndex).getCourseGoalModel();
                 // goals
-                for (int rowGoal = 0; rowGoal < courseGoalModel.getGoals().size(); rowGoal++) {
-                    stringBuilder.append(courseGoalModel.getGoals().get(rowGoal));
-                    if (rowGoal != courseGoalModel.getGoals().size()-1) {
+                for (int rowGoal = 0; rowGoal < courseGoalModel.getObjective().size(); rowGoal++) {
+                    stringBuilder.append(courseGoalModel.getObjective().get(rowGoal));
+                    if (rowGoal != courseGoalModel.getObjective().size() - 1) {
                         stringBuilder.append(",");
                     }
                 }
                 stringBuilder.append(":");
                 // partGoals
-                for (int colGoal = 0; colGoal < courseGoalModel.getPartGoals().size(); colGoal++) {
-                    stringBuilder.append(courseGoalModel.getPartGoals().get(colGoal));
-                    if (colGoal != courseGoalModel.getPartGoals().size()-1) {
+                for (int colGoal = 0; colGoal < courseGoalModel.getMilestone().size(); colGoal++) {
+                    stringBuilder.append(courseGoalModel.getMilestone().get(colGoal));
+                    if (colGoal != courseGoalModel.getMilestone().size() - 1) {
                         stringBuilder.append(",");
+                    }
+                }
+
+                stringBuilder.append(":");
+                // write the maxPoints for each milestone
+                for (int maxRow = 0; maxRow < courseGoalModel.getMaxPoits().size(); maxRow++) {
+                    for (int maxCol = 0; maxCol < courseGoalModel.getMaxPoits().get(0).size(); maxCol++) {
+                        stringBuilder.append(courseGoalModel.getMaxPoits().get(maxRow).get(maxCol));
+                        if (maxRow == courseGoalModel.getMaxPoits().size()-1 && maxCol == courseGoalModel.getMaxPoits().get(0).size()-1) {
+                            continue;
+                        }else {
+                            stringBuilder.append(",");
+                        }
                     }
                 }
                 // end of info 5
@@ -145,6 +160,27 @@ public class DataSaver implements Runnable {
                 fileWriter.write(Base64.getEncoder().encode(stringBuilder.toString().getBytes()));
             }
             fileWriter.write("<".getBytes());
+
+            fileWriter.flush();
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            BufferedOutputStream fileWriter = new BufferedOutputStream(new FileOutputStream("content/Students.txt"));
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(settingsLoader.getLastIDNumber());
+
+            for (int scatterIndex = 0; scatterIndex < settingsLoader.getScatteredIDNumbers().size(); scatterIndex++) {
+                stringBuilder.append(settingsLoader.getScatteredIDNumbers().get(scatterIndex));
+                if (scatterIndex != settingsLoader.getScatteredIDNumbers().size()-1) {
+                    stringBuilder.append(",");
+                }
+            }
+
+            stringBuilder.append(";");
+            fileWriter.write(Base64.getEncoder().encode(stringBuilder.toString().getBytes()));
 
             fileWriter.flush();
             fileWriter.close();

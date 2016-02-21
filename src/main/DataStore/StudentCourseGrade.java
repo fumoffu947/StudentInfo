@@ -11,7 +11,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.*;
@@ -156,7 +155,7 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
 
             JPanel studentGradeContainer = new JPanel(new BorderLayout());
             DefaultTableModel studentTableModel = new DefaultTableModel();
-            MyJTable studentTable = new MyJTable(studentTableModel,0,0,new ArrayList<>(Collections.singletonList(courseInfo.getCourseGoalModel().getPartGoals().size() + 1)));
+            MyJTable studentTable = new MyJTable(studentTableModel,0,0,new ArrayList<>(Collections.singletonList(courseInfo.getCourseGoalModel().getMilestone().size() + 1)));
             studentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             StudentGrade studentGrade = personLexicon.getCourseGradeByPerson(givenStudents.get(studentIndex), courseInfo.getCourseName());
 
@@ -182,7 +181,7 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
                         newValue = (Integer) vector.get(studentTable.getSelectedColumn());
                     }
 
-                    studentTableModel.setValueAt(sum,studentTable.getSelectedRow(),courseInfo.getCourseGoalModel().getPartGoals().size() + 1);
+                    studentTableModel.setValueAt(sum,studentTable.getSelectedRow(), courseInfo.getCourseGoalModel().getMilestone().size() + 1);
 
                     // change the grade in the personLexicon
                     if (currentStudentPageIndex - 1 < courseInfo.getClassInfo().getStudents().size()) {
@@ -208,18 +207,18 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
             // adds the first column
             studentTableModel.addColumn("Goals");
             // adds all the columns of partGoals to this student table
-            for (int colIndex = 0; colIndex < courseInfo.getCourseGoalModel().getPartGoals().size(); colIndex++) {
-                studentTableModel.addColumn(courseInfo.getCourseGoalModel().getPartGoals().get(colIndex));
+            for (int colIndex = 0; colIndex < courseInfo.getCourseGoalModel().getMilestone().size(); colIndex++) {
+                studentTableModel.addColumn(courseInfo.getCourseGoalModel().getMilestone().get(colIndex));
             }
             studentTableModel.addColumn("Summary");
             //adds all the rows of data to this table, which is gotten from this students StudentGrade from personLexicon
             // and adds all of then to an ObjectArray which then is the full data row
-            for (int gradeRow = 0; gradeRow < courseInfo.getCourseGoalModel().getGoals().size(); gradeRow++) {
+            for (int gradeRow = 0; gradeRow < courseInfo.getCourseGoalModel().getObjective().size(); gradeRow++) {
                 Object[] grade = studentGrade.getGrades().get(gradeRow).toArray();
                 int goalSum = studentGrade.getGrades().get(gradeRow).stream().mapToInt(Integer::intValue).sum();
                 Object[] rowData = new Object[grade.length+2];
                 rowData[grade.length+1] = goalSum;
-                rowData[0] = courseInfo.getCourseGoalModel().getGoals().get(gradeRow);
+                rowData[0] = courseInfo.getCourseGoalModel().getObjective().get(gradeRow);
                 // adds the scores from the grade to the current row ObjectArray
                 for (int index = 1; index < grade.length+1; index++) {
                     rowData[index] = grade[index-1];
@@ -241,7 +240,7 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
             DefaultTableModel summaryTableModel = new DefaultTableModel();
             MyJTable summaryTable = new MyJTable(summaryTableModel, 0, courseInfo.getClassInfo().getStudents().size() + courseInfo.getOtherEnlistedStudents().size(), new ArrayList<>());
 
-            summaryTableModel.addColumn("Goals", courseInfo.getCourseGoalModel().getGoals().toArray());
+            summaryTableModel.addColumn("Goals", courseInfo.getCourseGoalModel().getObjective().toArray());
 
             // goes through the students grades and sums them for each goal and show them in the summaryPage
             summaryTableAddStudent(summaryTableModel, courseInfo.getClassInfo().getStudents());
