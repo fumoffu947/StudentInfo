@@ -240,7 +240,19 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
             DefaultTableModel summaryTableModel = new DefaultTableModel();
             MyJTable summaryTable = new MyJTable(summaryTableModel, 0, courseInfo.getClassInfo().getStudents().size() + courseInfo.getOtherEnlistedStudents().size(), new ArrayList<>());
 
-            summaryTableModel.addColumn("Goals", courseInfo.getCourseGoalModel().getObjective().toArray());
+            summaryTableModel.addColumn("Students");
+
+            char[] gradeLevelArrayChar = new char[3];
+            gradeLevelArrayChar[0] = 'E';
+            gradeLevelArrayChar[1] = 'C';
+            gradeLevelArrayChar[2] = 'A';
+
+            for (int gradeLevel = 0; gradeLevel < 3; gradeLevel++) {
+                for (int goalModelRow = 0; goalModelRow < courseInfo.getCourseGoalModel().getObjective().size(); goalModelRow++) {
+                    summaryTableModel.addColumn(courseInfo.getCourseGoalModel().getObjective().get(goalModelRow)+" "+gradeLevelArrayChar[gradeLevel]);
+                }
+            }
+            //summaryTableModel.addColumn("Goals", courseInfo.getCourseGoalModel().getObjective().toArray());
 
             // goes through the students grades and sums them for each goal and show them in the summaryPage
             summaryTableAddStudent(summaryTableModel, courseInfo.getClassInfo().getStudents());
@@ -277,13 +289,21 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
     //used when the summaryPage is setup
     private void summaryTableAddStudent(DefaultTableModel summaryTableModel, List<Student> currentStudentList) {
         for (int studentIndex = 0; studentIndex < currentStudentList.size(); studentIndex++) {
-            ArrayList<Integer> columnData = new ArrayList<>();
+            ArrayList<Object> columnData = new ArrayList<>();
+            columnData.add(currentStudentList.get(studentIndex));
             StudentGrade studentGrade = personLexicon.getCourseGradeByPerson(currentStudentList.get(studentIndex), courseInfo.getCourseName());
             //sums each grade and adds to an array to be the columnDataObject
-            for (int gradeRow = 0; gradeRow < studentGrade.getGrades().size(); gradeRow++) {
-                columnData.add(studentGrade.getGrades().get(gradeRow).stream().mapToInt(Integer::intValue).sum());
+            for (int gradeLevel = 0; gradeLevel < 3; gradeLevel++) {
+                for (int gradeRow = 0; gradeRow < studentGrade.getGrades().size(); gradeRow++) {
+                    int currentGradeLevelSum = 0;
+                    for (int gradeCol = (studentGrade.getGrades().get(0).size()/3)*gradeLevel; gradeCol < (studentGrade.getGrades().get(0).size()/3)*(gradeLevel+1); gradeCol++) {
+                        currentGradeLevelSum += studentGrade.getGrades().get(gradeRow).get(gradeCol);
+                    }
+                    columnData.add(currentGradeLevelSum);
+                }
             }
-            summaryTableModel.addColumn(currentStudentList.get(studentIndex), columnData.toArray());
+
+            summaryTableModel.addRow(columnData.toArray());
         }
     }
 

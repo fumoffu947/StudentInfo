@@ -6,6 +6,7 @@ import main.Interfaces.PaneInterfaceSwitches.SwitchToAddStudentTeacherToCourse;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -60,12 +61,13 @@ public class CreateCourse implements main.Interfaces.Panel {
 		this.rePackWindow = rePackWindow;
 		this.switchPanel = switchPanel;
 		tableModel.addColumn("Objective Column");
-		tableModel.addColumn("Milestone 1");
+		tableModel.addColumn("Milestone 1: E");
+		tableModel.addColumn("Milestone 1: C");
+		tableModel.addColumn("Milestone 1: A");
 		tableModel.addRow(new Object[] {});
 		tableModel.addRow(new Object[] {});
 		tableModel.setValueAt("Objective/Milestone",0,0);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-
 
 		setUpButtons(rePackWindow, jMenuBar);
 
@@ -115,7 +117,18 @@ public class CreateCourse implements main.Interfaces.Panel {
 				if (table.isEditing()) {
 					table.getCellEditor().stopCellEditing();
 				}
-				tableModel.addColumn("Milestone "+table.getColumnCount());
+
+				char[] gradeLevelArrayChar = new char[3];
+				gradeLevelArrayChar[0] = 'E';
+				gradeLevelArrayChar[1] = 'C';
+				gradeLevelArrayChar[2] = 'A';
+				int baseOfSet = (table.getColumnCount()-1)/3;
+				for (int gradeLevel = 2; gradeLevel > -1; gradeLevel--) {
+					table.addColumn(new TableColumn(1));
+					table.getColumnModel().getColumn(table.getColumnCount()-1).setHeaderValue("Milestone "+
+							(baseOfSet+1)+": "+gradeLevelArrayChar[gradeLevel]);
+					table.moveColumn(table.getColumnCount()-1,(baseOfSet*(gradeLevel+1))+1);
+				}
 				rePackWindow.rePackWindow();
 
 	    	}
@@ -145,11 +158,11 @@ public class CreateCourse implements main.Interfaces.Panel {
 
 				ArrayList<String> objectives = new ArrayList<>();
 				ArrayList<String> milestone = new ArrayList<>();
-				List<List<Integer>> maxPointModel = new ArrayList<List<Integer>>();
+				List<List<Integer>> maxPointModel = new ArrayList<>();
 
 				if (table.getColumnCount() > 1 && table.getRowCount() > 1) {
 
-					for (int col = 1; col < table.getColumnCount(); col++) {
+					for (int col = 1; col < ((table.getColumnCount()-1)/3)+1; col++) {
 						String arg = (String) table.getValueAt(0, col);
 						if (arg != null && !arg.isEmpty()) {
 							milestone.add(arg);
@@ -163,15 +176,18 @@ public class CreateCourse implements main.Interfaces.Panel {
 						}
 					}
 
+					int baseOfSet = (table.getColumnCount()-1)/3;
 					for (int row = 1; row < table.getRowCount(); row++) {
 						maxPointModel.add(new ArrayList<>());
-						for (int col = 1; col < table.getColumnCount(); col++) {
-							String arg = (String) table.getValueAt(row, col);
-							if (arg != null && !arg.isEmpty()) {
-								maxPointModel.get(row).add(Integer.parseInt(arg));
-							}
-							else {
-								maxPointModel.get(row).add(0);
+						for (int gradeLevel = 0; gradeLevel < 3; gradeLevel++) {
+							for (int col = baseOfSet*gradeLevel+1; col < (baseOfSet*(gradeLevel))+1+milestone.size(); col++) {
+								String arg = (String) table.getValueAt(row, col);
+								if (arg != null && !arg.isEmpty()) {
+									maxPointModel.get(row-1).add(Integer.parseInt(arg));
+								}
+								else {
+									maxPointModel.get(row).add(0);
+								}
 							}
 						}
 					}

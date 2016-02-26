@@ -36,7 +36,9 @@ public class ChooseGroupPage implements Panel {
         classesTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         for (ClassInfo classInfo : classes) {
-            classesTableModel.addRow(new Object[] {classInfo.getClassName(), classInfo.getStudents().size(), false});
+            if (classInfo.getClassName().equals("No Class")) {
+                classesTableModel.addRow(new Object[]{classInfo.getClassName(), classInfo.getStudents().size(), false});
+            }
         }
 
         this.continueButton = new JButton();
