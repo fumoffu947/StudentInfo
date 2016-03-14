@@ -3,7 +3,6 @@ package main.DataStore;
 import main.DataStore.Lexicon.PersonLexicon;
 
 import java.io.BufferedOutputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Base64;
@@ -94,7 +93,13 @@ public class DataSaver implements Runnable {
                 stringBuilder.append(";");
 
                 // writhe the name for the class to add to the course to get from the YearHolderPage (May change name to Groups or similar)
-                stringBuilder.append(courses.get(courseIndex).getClassInfo().getClassName());
+                for (int i = 0; i < courses.get(courseIndex).getClassInfoList().size(); i++) {
+                    stringBuilder.append(courses.get(courseIndex).getClassInfoList().get(i).getClassName());
+                    if (i != courses.get(courseIndex).getClassInfoList().size()-1) {
+                        stringBuilder.append(",");
+                    }
+                }
+
                 // end of info 2
                 stringBuilder.append(";");
 
