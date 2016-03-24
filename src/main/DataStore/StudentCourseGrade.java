@@ -32,6 +32,7 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
     private boolean contentChanged = true;
     private int currentStudentPageIndex = 0;
     private List<Boolean> upToDateList = new ArrayList<>();
+    private List<Integer> translationList = new ArrayList<>();
 
     private List<JPanel> studentPages = new ArrayList<>();
 
@@ -47,7 +48,6 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
     private JButton removeStudentsButton;
     private JButton acquireNewStudents;
     private boolean changePage = true;
-    private DefaultTableModel summaryTableModel;
     private char[] gradeLevelArrayChar;
 
     public StudentCourseGrade(CourseInfo courseInfo, JMenuBar jMenuBar, PersonLexicon personLexicon, RePackWindow rePackWindow, StartGetListOfStudents startGetListOfStudents) {
@@ -89,6 +89,9 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
                         System.out.println(studentListTableModel.getValueAt(i,0));
                         System.out.println(i);
                         ClassInfoListIndexHolder indexHolder = selectListIndexTranslator(i);
+                        if (indexHolder.totalIndex == -1) {
+                            return;
+                        }
                         if (!upToDateList.get(indexHolder.totalIndex) && indexHolder.totalIndex != 0) {
                             JTable table = (JTable) ((JScrollPane)((JPanel)studentPages.get(indexHolder.totalIndex).getComponents()[0]).getComponents()[0]).getComponents()[0];
                             DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
@@ -124,11 +127,21 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
             for (int i = 0; i < classInfo.getStudents().size(); i++) {
                 upToDateList.add(true);
             }
+            if (translationList.isEmpty()) {
+                translationList.add(classInfo.getStudents().size() + 1);
+            }else {
+                translationList.add(translationList.get(translationList.size()-1)+ classInfo.getStudents().size() + 1);
+            }
         }
         studentListTableModel.addRow(new Object[] {"Other Students"});
         addListOfStudent(courseInfo.getOtherEnlistedStudents());
         for (int i = 0; i < courseInfo.getOtherEnlistedStudents().size(); i++) {
             upToDateList.add(true);
+        }
+        if (translationList.isEmpty()) {
+            translationList.add(courseInfo.getOtherEnlistedStudents().size() + 1);
+        } else {
+            translationList.add(translationList.get(translationList.size()-1)+courseInfo.getOtherEnlistedStudents().size() + 1);
         }
 
 
@@ -203,21 +216,10 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
         if (index == 0) {
             return new ClassInfoListIndexHolder(-1,index,false,0);
         }
-        int totalIndex = 1;
-        int studentCount = 1;
-        for (int i = 0; i < courseInfo.getClassInfoList().size(); i++) {
-            if (!courseInfo.getClassInfoList().get(i).getStudents().isEmpty()) {
-                if (index < studentCount + 1 + courseInfo.getClassInfoList().get(i).getStudents().size()) {
-                    int studentIndex = index - 1 - studentCount;
-                    return new ClassInfoListIndexHolder(i, studentIndex, false, totalIndex + studentIndex);
-                }
-                studentCount++;
-                studentCount += courseInfo.getClassInfoList().get(i).getStudents().size();
-                totalIndex += courseInfo.getClassInfoList().get(i).getStudents().size();
-            }
+        for (int i = 0; i < ; i++) {
+            
         }
-        int otherStudentIndex = index - 1 - studentCount;
-        return new ClassInfoListIndexHolder(-1 , otherStudentIndex, true, totalIndex+otherStudentIndex);
+        
     }
 
 
