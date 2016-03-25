@@ -36,7 +36,6 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
 
     private GridBagLayout gridBagLayout = new GridBagLayout();
     private JPanel pageHolder = new JPanel(gridBagLayout);
-    //private GridBagLayout gbl = new GridBagLayout();
     private JPanel studentGradePage = new JPanel(new BorderLayout());
     private JPanel summaryTableContainer = new JPanel(new BorderLayout());
 
@@ -47,7 +46,6 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
     private JButton removeStudentsButton;
     private JButton acquireNewStudents;
     private boolean changePage = true;
-    private DefaultTableModel summaryTableModel;
 
     public StudentCourseGrade(CourseInfo courseInfo, JMenuBar jMenuBar, PersonLexicon personLexicon, RePackWindow rePackWindow, StartGetListOfStudents startGetListOfStudents) {
         this.courseInfo = courseInfo;
@@ -56,6 +54,7 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
         this.startGetListOfStudents = startGetListOfStudents;
 
 
+        // placemant of the selectList of the student to the leaft
         GridBagConstraints studentListConstraints = new GridBagConstraints();
         studentListConstraints.gridx = 0;
         studentListConstraints.weightx = 0.5;
@@ -63,6 +62,7 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
         studentListConstraints.fill = GridBagConstraints.BOTH;
         pageHolder.add(new JScrollPane(studentList) , studentListConstraints);
 
+        // placement of the gradepage that is swaped out between each student selection
         GridBagConstraints studentPageGradeConstraints = new GridBagConstraints();
         studentPageGradeConstraints.gridx = 1;
         studentPageGradeConstraints.weightx = 3.0;
@@ -70,6 +70,7 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
         studentPageGradeConstraints.fill = GridBagConstraints.BOTH;
         pageHolder.add(studentGradePage, studentPageGradeConstraints);
 
+        // the acutal list of student to select and the selection action
         studentListTableModel.addColumn("Pages");
         studentList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         studentList.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
