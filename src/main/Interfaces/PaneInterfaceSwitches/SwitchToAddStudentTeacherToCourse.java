@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface SwitchToAddStudentTeacherToCourse {
 
-    void startAddStudentTeacherToCourse(String courseName, CourseGoalModel  courseGoalModel, ClassInfo classInfo);
+    void startAddStudentTeacherToCourse(String courseName, CourseGoalModel  courseGoalModel, List<ClassInfo> classInfo);
 
     void startChooseGroupPage(String courseName, CourseGoalModel  courseGoalModel);
 }

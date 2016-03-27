@@ -13,6 +13,7 @@ import java.awt.*;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.List;
 
@@ -65,7 +66,8 @@ public class CoursesPage implements main.Interfaces.Panel {
 
     private void loadCourseFromString(String[] courseInfo, PersonLexicon personLexicon, GroupDataTransfer groupDataTransfer) {
         String courseName = courseInfo[0];
-        ClassInfo classInfo = groupDataTransfer.getClassInfoByName(courseInfo[1]);
+        String[] classInfoNames = courseInfo[1].split(",");
+        ArrayList<ClassInfo> classInfos = new ArrayList<>();
         String[] otherEnlisted = courseInfo[2].split(",");
         ArrayList<Student> otherEnlistedArrayList = new ArrayList<>();
 
@@ -78,6 +80,12 @@ public class CoursesPage implements main.Interfaces.Panel {
 
         String[] maxPointsArray = gradeModelArray[2].split(",");
         List<List<Integer>> maxPointModel = new ArrayList<>();
+
+        for (int classIndex = 0; classIndex < classInfoNames.length; classIndex++) {
+            classInfos.add(groupDataTransfer.getClassInfoByName(classInfoNames[classIndex]));
+
+        }
+
 
         for (int maxPointRowIndex = 0; maxPointRowIndex < goals.size(); maxPointRowIndex++) {
             maxPointModel.add(new ArrayList<>());
@@ -108,7 +116,7 @@ public class CoursesPage implements main.Interfaces.Panel {
             }
         }
 
-        courses.add(new CourseInfo(classInfo,otherEnlistedArrayList,courseName,teacherArrayList,new CourseGoalModel(goals,parGoals,maxPointModel)));
+        courses.add(new CourseInfo(classInfos,otherEnlistedArrayList,courseName,teacherArrayList,new CourseGoalModel(goals,parGoals,maxPointModel)));
     }
 
     private void setupTableInfo(final List<CourseInfo> courses, final SwitchToStudentCourseGrade switchToStudentCourseGrade) {
@@ -125,9 +133,11 @@ public class CoursesPage implements main.Interfaces.Panel {
             CourseInfo courseInfo = courses.get(courseIndex);
             int size = 0;
             String className = "";
-            if (courseInfo.getClassInfo() != null) {
-                size = courseInfo.getClassInfo().getStudents().size();
-                className = courseInfo.getClassInfo().getClassName();
+            if (courseInfo.getClassInfoList() != null) {
+                for (int i = 0; i < courseInfo.getClassInfoList().size(); i++) {
+                    size += courseInfo.getClassInfoList().get(i).getStudents().size();
+                    className += " " + courseInfo.getClassInfoList().get(i).getClassName();
+                }
             }
 
             coursesAndInfoTableModel.addRow(new Object[] {courseInfo.getCourseName(),courseInfo.getTeachers().size(),
@@ -174,8 +184,16 @@ public class CoursesPage implements main.Interfaces.Panel {
     }
 
     public void addCourse(CourseInfo courseInfo) {
+        int size = 0;
+        String className = "";
+        if (courseInfo.getClassInfoList() != null) {
+            for (int i = 0; i < courseInfo.getClassInfoList().size(); i++) {
+                size += courseInfo.getClassInfoList().get(i).getStudents().size();
+                className += " " + courseInfo.getClassInfoList().get(i).getClassName();
+            }
+        }
         coursesAndInfoTableModel.addRow(new Object[] {courseInfo.getCourseName(),courseInfo.getTeachers().size(),
-                courseInfo.getClassInfo().getClassName(), courseInfo.getClassInfo().getStudents().size(),
+                className, size,
                 courseInfo.getOtherEnlistedStudents().size()});
         courses.add(courseInfo);
     }

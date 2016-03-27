@@ -26,3 +26,4 @@ fixa så att Id nummret sparas och skrivs ut så att man håller reda på vilka 
 fixa så att man kan ta bort personer från lexicon //
 lägg till en lista i en course om man tar bort en person från en grup så man ej behöver ta bort dem från gruppen utan bar kan skita i att ha med personen //
 fixa så att man bara kan skriva siffror på max poängen i courseCreation //
+fixa så man får ett medelande om man får en för hög poäng på studentCourseGradePagen och fråga om man ska behålla det eller inte (3 alternativ ja,nej,avrunda) //

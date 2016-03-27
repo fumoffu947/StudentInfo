@@ -23,20 +23,23 @@ public class ChooseGroupPage implements Panel {
     private JButton continueButton;
 
 
-    private DefaultTableModel classesTableModel = new DefaultTableModel();
+    private ChooseGroupeTableModel classesTableModel = new ChooseGroupeTableModel();
     private MyJTable classesTable = new MyJTable(classesTableModel,0,1,new ArrayList<>());
 
     public ChooseGroupPage(List<ClassInfo> classes, SwitchToAddStudentTeacherToCourse switchToAddStudentTeacherToCourse,
                            String courseName, CourseGoalModel courseGoalModel, JMenuBar jMenuBar) {
 
 
-        classesTableModel.addColumn("Group name");
+        classesTableModel.addColumn("Group Name");
         classesTableModel.addColumn("Number Of Students");
+        classesTableModel.addColumn("Chosen Classes");
 
         classesTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
+        System.out.println("number of classes: "+classes.size());
+
         for (ClassInfo classInfo : classes) {
-            if (classInfo.getClassName().equals("No Class")) {
+            if (!classInfo.getClassName().equals("No Class")) {
                 classesTableModel.addRow(new Object[]{classInfo.getClassName(), classInfo.getStudents().size(), false});
             }
         }
@@ -47,11 +50,17 @@ public class ChooseGroupPage implements Panel {
             public void actionPerformed(ActionEvent e) {
                 clearMenuBar(jMenuBar);
                 int selectedRow = classesTable.getSelectedRow();
-                ClassInfo classInfo = new ClassInfo(new ArrayList<Student>(),"No Class");
-                if (selectedRow > -1) {
-                    classInfo = classes.get(selectedRow);
+                ClassInfo noClassInfo = new ClassInfo(new ArrayList<Student>(),"No Class");
+                ArrayList<ClassInfo> classInfos = new ArrayList<>();
+                for (int row = 0; row < classesTable.getRowCount(); row++) {
+                    if ((Boolean) classesTable.getValueAt(row,2)) {
+                        classInfos.add(classes.get(row+1));
+                    }
                 }
-                switchToAddStudentTeacherToCourse.startAddStudentTeacherToCourse(courseName, courseGoalModel, classInfo);
+                if (classInfos.isEmpty()) {
+                    classInfos.add(noClassInfo);
+                }
+                switchToAddStudentTeacherToCourse.startAddStudentTeacherToCourse(courseName, courseGoalModel, classInfos);
             }
         });
         continueButton.setText("Continue");
@@ -91,5 +100,17 @@ public class ChooseGroupPage implements Panel {
     @Override
     public JPanel getPageHolder() {
         return pageHolder;
+    }
+
+    private class ChooseGroupeTableModel extends DefaultTableModel {
+
+        @Override public Class<?> getColumnClass(final int columnIndex) {
+            switch (columnIndex) {
+                case (2):
+                    return Boolean.class;
+                default:
+                    return super.getColumnClass(columnIndex);
+            }
+        }
     }
 }

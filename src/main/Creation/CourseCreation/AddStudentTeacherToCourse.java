@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
 
-    private final ClassInfo classInfo;
+    private final List<ClassInfo> classIfs;
     private final String courseName;
     private final SwitchToStudentCourseGrade switchToStudentCourseGrade;
     /**
@@ -50,13 +50,13 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
     private JTable teacherSearchResultTable = new JTable(teacherSearchResultTableModel);
 
     public AddStudentTeacherToCourse(PersonLexicon personLexicon, JMenuBar jMenuBar, RePackWindow rePackWindow,
-                                     String courseName, CourseGoalModel courseGoalModel, ClassInfo classInfo,
+                                     String courseName, CourseGoalModel courseGoalModel, List<ClassInfo> classIfs,
                                      SwitchToStudentCourseGrade switchToStudentCourseGrade) {
 
         this.personLexicon = personLexicon;
         this.rePackWindow = rePackWindow;
         this.courseGoalModel = courseGoalModel;
-        this.classInfo = classInfo;
+        this.classIfs = classIfs;
         this.courseName = courseName;
         this.switchToStudentCourseGrade = switchToStudentCourseGrade;
         setupMenuButtons(jMenuBar, rePackWindow);
@@ -112,10 +112,12 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
                     students.add((Student) studentInCourseTableModel.getValueAt(studentIndex,0));
                 }
 
-                insertNewGradeToCourse(classInfo.getStudents());
-                insertNewGradeToCourse(students);
+                for (int i = 0; i < classIfs.size(); i++) {
+                    insertNewGradeForStudentToCourse(classIfs.get(i).getStudents());
+                }
+                insertNewGradeForStudentToCourse(students);
 
-                switchToStudentCourseGrade.switchToCourseGradePageAndAddCourseInfo(new CourseInfo(classInfo,students,courseName,teachers,courseGoalModel));
+                switchToStudentCourseGrade.switchToCourseGradePageAndAddCourseInfo(new CourseInfo(classIfs,students,courseName,teachers,courseGoalModel));
                 rePackWindow.rePackWindow();
             }
         });
@@ -123,12 +125,12 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
         jMenuBar.add(continueButton);
     }
 
-    private void insertNewGradeToCourse(List<Student> studentList) {
+    private void insertNewGradeForStudentToCourse(List<Student> studentList) {
         for(int classStudentIndex = 0; classStudentIndex < studentList.size(); classStudentIndex++) {
             ArrayList<ArrayList<Integer>> grade = new ArrayList<>();
             for (int gradeRow = 0; gradeRow < courseGoalModel.getObjective().size(); gradeRow++) {
                 grade.add(new ArrayList<>());
-                for (int gradeCol = 0; gradeCol < courseGoalModel.getMilestone().size(); gradeCol++) {
+                for (int gradeCol = 0; gradeCol < courseGoalModel.getMilestone().size()*3; gradeCol++) {
                     grade.get(gradeRow).add(0);
                 }
             }
@@ -390,7 +392,7 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
                 for (int row = studentSearchResultTableModel.getRowCount() -1; row > -1; row--) {
                     boolean alreadyInCourse = false;
                     if ((boolean) studentSearchResultTableModel.getValueAt(row,1)) {
-                        if (classInfo == null || !classInfo.getStudents().contains(studentSearchResultTableModel.getValueAt(row, 0))){
+                        if (classIfs == null || !containsStudent((Student) studentSearchResultTableModel.getValueAt(row, 0),classIfs)){
                             for (int inCourseRow = 0; inCourseRow < studentInCourseTableModel.getRowCount(); inCourseRow++) {
                                 if (((Person) studentInCourseTableModel.getValueAt(inCourseRow, 0)).getID() == ((Person) studentSearchResultTableModel.getValueAt(row, 0)).getID()) {
                                     alreadyInCourse = true;
@@ -407,6 +409,15 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
         });
         addStudents.setText("Add Students");
         container.add(addStudents, addStudentConstraints);
+    }
+
+    private boolean containsStudent(Student student, List<ClassInfo> classInfos) {
+        for (int i = 0; i < classInfos.size(); i++) {
+            if (classInfos.get(i).getStudents().contains(student)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public JPanel getPageHolder() {

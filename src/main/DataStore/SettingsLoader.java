@@ -19,7 +19,7 @@ import java.util.List;
 public class SettingsLoader {
 
     private List<Integer> scatteredIDNumbers = new ArrayList<>();
-    private int lastIDNumber = 0;
+    private int lastIDNumber;
 
     public SettingsLoader(BufferedInputStream fileReader) {
         try {
@@ -38,9 +38,11 @@ public class SettingsLoader {
 
                 lastIDNumber = Integer.parseInt(idArrayInfo[0]);
 
-                String[] scatterdIDArray = idArrayInfo[1].split(",");
-                for (int scatterdIndex = 0; scatterdIndex < scatterdIDArray.length; scatterdIndex++) {
-                    scatteredIDNumbers.add(Integer.parseInt(scatterdIDArray[scatterdIndex]));
+                if (idArrayInfo.length != 1) {
+                    String[] scatterdIDArray = idArrayInfo[1].split(",");
+                    for (int scatterdIndex = 0; scatterdIndex < scatterdIDArray.length; scatterdIndex++) {
+                        scatteredIDNumbers.add(Integer.parseInt(scatterdIDArray[scatterdIndex]));
+                    }
                 }
             }else {
                 scatteredIDNumbers = new ArrayList<>();

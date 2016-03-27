@@ -17,13 +17,12 @@ import main.Interfaces.Panel;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * Created by fumoffu on 2015-10-20.
@@ -132,7 +131,7 @@ public class MainFrame extends JFrame {
 
         this.switchToAddStudentTeacherToCourse = new SwitchToAddStudentTeacherToCourse() {
             @Override
-            public void startAddStudentTeacherToCourse(String courseName, CourseGoalModel courseGoalModel, ClassInfo classInfo) {
+            public void startAddStudentTeacherToCourse(String courseName, CourseGoalModel courseGoalModel, java.util.List<ClassInfo> classInfo) {
                 setNewPage(new AddStudentTeacherToCourse(personLexicon,mainFrame.getJMenuBar(), rePackWindow,courseName, courseGoalModel,classInfo,switchToStudentCourseGrade));
             }
 

@@ -31,6 +31,8 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
 
     private boolean contentChanged = true;
     private int currentStudentPageIndex = 0;
+    private List<Boolean> upToDateList = new ArrayList<>();
+    private List<Integer> translationList = new ArrayList<>();
 
     private List<JPanel> studentPages = new ArrayList<>();
 
@@ -46,12 +48,17 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
     private JButton removeStudentsButton;
     private JButton acquireNewStudents;
     private boolean changePage = true;
+    private char[] gradeLevelArrayChar;
 
     public StudentCourseGrade(CourseInfo courseInfo, JMenuBar jMenuBar, PersonLexicon personLexicon, RePackWindow rePackWindow, StartGetListOfStudents startGetListOfStudents) {
         this.courseInfo = courseInfo;
         this.personLexicon = personLexicon;
         this.rePackWindow = rePackWindow;
         this.startGetListOfStudents = startGetListOfStudents;
+        this.gradeLevelArrayChar = new char[3];
+        gradeLevelArrayChar[0] = 'E';
+        gradeLevelArrayChar[1] = 'C';
+        gradeLevelArrayChar[2] = 'A';
 
 
         // placemant of the selectList of the student to the leaft
@@ -84,8 +91,21 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
                     if (e.getValueIsAdjusting() && lsm.isSelectedIndex(i)) {
                         System.out.println(studentListTableModel.getValueAt(i,0));
                         System.out.println(i);
+                        ClassInfoListIndexHolder indexHolder = selectListIndexTranslator(i);
+                        if (indexHolder.totalIndex == -1) {
+                            return;
+                        }
+                        if (!upToDateList.get(indexHolder.totalIndex) && indexHolder.totalIndex != 0) {
+                            JTable table = (JTable) ((JScrollPane)((JPanel)studentPages.get(indexHolder.totalIndex).getComponents()[0]).getComponents()[0]).getComponents()[0];
+                            DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
+                            for (int row = 0; row < courseInfo.getCourseGoalModel().getMaxPoits().size(); row++) {
+                                for (int col = 1; col < courseInfo.getCourseGoalModel().getMaxPoits().get(row).size()+1; col++) {
+                                    tableModel.setValueAt(courseInfo.getCourseGoalModel().getMaxPoits().get(row).get(col-1),row*2+1,col);
+                                }
+                            }
+                        }
                         studentGradePage.removeAll();
-                        studentGradePage.add(studentPages.get(i));
+                        studentGradePage.add(studentPages.get(indexHolder.totalIndex));
                         currentStudentPageIndex = i;
                         rePackWindow.rePackWindow();
                     }
@@ -98,9 +118,35 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
         // adds the summary page to the studentPage
         setupSummaryPage();
 
+        // add a bool for the summary page
+        upToDateList.add(true);
+
         // add separate pages to all the students in the course
-        addListOfStudent(courseInfo.getClassInfo().getStudents());
+        for(ClassInfo classInfo : courseInfo.getClassInfoList()) {
+            if (!classInfo.getClassName().equals("No Class")) {
+                studentListTableModel.addRow(new Object[]{classInfo.getClassName()});
+                addListOfStudent(classInfo.getStudents());
+                for (int i = 0; i < classInfo.getStudents().size(); i++) {
+                    upToDateList.add(true);
+                }
+                if (translationList.isEmpty()) {
+                    translationList.add(classInfo.getStudents().size() + 1);
+                }else {
+                    translationList.add(translationList.get(translationList.size()-1)+ classInfo.getStudents().size() + 1);
+                }
+            }
+
+        }
+        studentListTableModel.addRow(new Object[] {"Other Students"});
         addListOfStudent(courseInfo.getOtherEnlistedStudents());
+        for (int i = 0; i < courseInfo.getOtherEnlistedStudents().size(); i++) {
+            upToDateList.add(true);
+        } /*
+        if (translationList.isEmpty()) {
+            translationList.add(courseInfo.getOtherEnlistedStudents().size() + 1);
+        } else {
+            translationList.add(translationList.get(translationList.size()-1)+courseInfo.getOtherEnlistedStudents().size() + 1);
+        }*/
 
 
         //create the button to remove students
@@ -110,7 +156,8 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
             public void actionPerformed(ActionEvent e) {
                 for(int row = studentList.getModel().getRowCount()-1; row > 0;row--) {
                     if ((boolean) studentList.getValueAt(row,1)) {
-                        if (row - 1 < courseInfo.getClassInfo().getStudents().size()) {
+                        ClassInfoListIndexHolder indexHolder = selectListIndexTranslator(row);
+                        if (!indexHolder.otherStudentList) {
                             System.out.println(courseInfo.removeStudent((Student) studentList.getValueAt(row,0)));
                         } else {
                             System.out.println(courseInfo.removeOtherEnlistedStudent((Student) studentList.getValueAt(row,0)));
@@ -119,7 +166,7 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
                         setupSummaryPage();
                     }
                 }
-                reMakeStudentListSelecter(courseInfo);
+                reMakeStudentListSelector(courseInfo);
 
 
             }
@@ -131,15 +178,99 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
         this.thisClass = this;
     }
 
-    private void reMakeStudentListSelecter(CourseInfo courseInfo) {
-        // redo the entire table model for the STudentList because i dont knwo how to remove a col rom a model or get the table to not recreate it from the model and to then apint the checkboxex correct
+    /**
+     * sets all the other booleans for knowing if given pos maxPoints is up to date
+     * @param selfPos
+     * it's the true pos of the list not pos of current selected in the selection list
+     */
+    private void resetUpdateToOther(int selfPos) {
+        if (upToDateList.get(selfPos)) {
+            for (int index = 0; index < upToDateList.size(); index++) {
+                if (index != selfPos) {
+                    upToDateList.set(index, false);
+                }
+            }
+        }else {
+            for (int i = 0; i < studentPages.size(); i++) {
+                if (!upToDateList.get(i)) {
+                    JTable table = (JTable) ((JScrollPane) ((JPanel) studentPages.get(i).getComponents()[0]).getComponents()[0]).getComponents()[0];
+                    DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
+                    for (int row = 0; row < courseInfo.getCourseGoalModel().getMaxPoits().size(); row++) {
+                        for (int col = 1; col < courseInfo.getCourseGoalModel().getMaxPoits().get(row).size() + 1; col++) {
+                            tableModel.setValueAt(courseInfo.getCourseGoalModel().getMaxPoits().get(row).get(col - 1), row*2+1, col);
+                        }
+                    }
+
+                }
+                upToDateList.set(i, true);
+            }
+        }
+    }
+
+    /**
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!need to add bool to say if it is on an class name or other name
+     * translates a pos in the student list to an list index to the classes and an index into that list and
+     * a boolean to say if it is an other student or not and create the total index
+     * @param index
+     * the index wanting to translate
+     * @return
+     * return index in class list, index into the list, bool for other students, toatal index of all students
+     */
+    private ClassInfoListIndexHolder selectListIndexTranslator(int index) {
+        if (index == 0) {
+            return new ClassInfoListIndexHolder(-1,index,false,0);
+        }
+        //special case for the first case of when the user presses on the name of the first class or otherClass
+        if (index == 1) {
+            return new ClassInfoListIndexHolder(-1,-1,false,-1);
+        }
+        for (int i = 0; i < translationList.size(); i++) {
+            if (index <= translationList.get(i)) {
+                if (i == 0) {
+                    // spacial case for the first list entry (i = 0)
+                    return new ClassInfoListIndexHolder(i,index-2,false,index-i-1);
+                } else {
+                    // clicked on an class name
+                    if (index == translationList.get(i-1)+1) {
+                        return new ClassInfoListIndexHolder(-1,-1,false,-1);
+                    }
+                    return new ClassInfoListIndexHolder(index-translationList.get(i-1)-1,i,false,index-i-1);
+                }
+            }
+        }
+
+        int otherOffset = 0;
+        int numberOfClasses = 0;
+        if (!translationList.isEmpty()) {
+            if (index == translationList.get(translationList.size()-1)+1) {
+                return new ClassInfoListIndexHolder(-1,-1,false,-1);
+            }
+            otherOffset = translationList.get(translationList.size()-1);
+            numberOfClasses = translationList.size();
+        }
+        return new ClassInfoListIndexHolder(-1,index-otherOffset-2,true,index-numberOfClasses-1);
+        
+    }
+
+
+    /**
+     * remakes the entire studentlistTableModel and swithes out the old model in list and local variable
+     * @param courseInfo
+     * courseInfo to use to fill list
+     */
+    private void reMakeStudentListSelector(CourseInfo courseInfo) {
+        // redo the entire table model for the StudentList because i don't know how to remove a col rom a model or get the table to not recreate it from the model and to then apint the checkboxex correct
         MyTableModel tmp = new MyTableModel();
         tmp.addColumn("Pages");
         tmp.addRow(new Object[] {"Summary"});
-        for (int studentIndex = 0; studentIndex < courseInfo.getClassInfo().getStudents().size(); studentIndex++) {
-            // add the student to the userSelection table on the left
-            tmp.addRow(new Object[]{courseInfo.getClassInfo().getStudents().get(studentIndex)});
+        //goes through all classes and add the students
+        for (int classIndex = 0; classIndex < courseInfo.getClassInfoList().size(); classIndex++) {
+            for (int studentIndex = 0; studentIndex < courseInfo.getClassInfoList().get(classIndex).getStudents().size(); studentIndex++) {
+                // add the student to the userSelection table on the left
+                tmp.addRow(new Object[]{courseInfo.getClassInfoList().get(classIndex).getStudents().get(studentIndex)});
+            }
         }
+
         for (int studentIndex = 0; studentIndex < courseInfo.getOtherEnlistedStudents().size(); studentIndex++) {
             // add the student to the userSelection table on the left
             tmp.addRow(new Object[]{courseInfo.getOtherEnlistedStudents().get(studentIndex)});
@@ -156,7 +287,7 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
 
             JPanel studentGradeContainer = new JPanel(new BorderLayout());
             DefaultTableModel studentTableModel = new DefaultTableModel();
-            MyJTable studentTable = new MyJTable(studentTableModel,0,0,new ArrayList<>(Collections.singletonList(courseInfo.getCourseGoalModel().getMilestone().size() + 1)));
+            MyJTable studentTable = new MyJTable(studentTableModel,0,0,new ArrayList<>(Collections.singletonList(courseInfo.getCourseGoalModel().getMilestone().size()*3 + 1)));
             studentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             StudentGrade studentGrade = personLexicon.getCourseGradeByPerson(givenStudents.get(studentIndex), courseInfo.getCourseName());
 
@@ -164,40 +295,59 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
                 @Override
                 public void editingStopped(ChangeEvent e) {
                     Vector<Object> vector = (Vector<Object>) studentTableModel.getDataVector().get(studentTable.getSelectedRow());
-                    int sum = 0;
-                    for (int index = 1; index < vector.size()-1; index++) {
-                        if (vector.get(index).getClass().equals(String.class)) {
-                            sum += Integer.parseInt((String) vector.get(index));
+                    if (studentTable.getSelectedRow() % 2 != 1) {
+                        int sum = 0;
+                        for (int index = 1; index < vector.size() - 1; index++) {
+                            if (vector.get(index).getClass().equals(String.class)) {
+                                sum += Integer.parseInt((String) vector.get(index));
+                            } else if (vector.get(index).getClass().equals(Integer.class)) {
+                                sum += (Integer) vector.get(index);
+                            }
                         }
-                        else if (vector.get(index).getClass().equals(Integer.class)) {
-                            sum += (Integer) vector.get(index);
+                        // parse the new value just typed in to just do i once
+                        int newValue = 0;
+                        if (vector.get(studentTable.getSelectedColumn()).getClass().equals(String.class)) {
+                            newValue = Integer.parseInt((String) vector.get(studentTable.getSelectedColumn()));
+                        } else if (vector.get(studentTable.getSelectedColumn()).getClass().equals(Integer.class)) {
+                            newValue = (Integer) vector.get(studentTable.getSelectedColumn());
+                        }
+
+                        studentTableModel.setValueAt(sum, studentTable.getSelectedRow(), courseInfo.getCourseGoalModel().getMilestone().size() * 3 + 1);
+
+                        // change the grade in the personLexicon
+                        ClassInfoListIndexHolder indexHolder = selectListIndexTranslator(currentStudentPageIndex);
+                        if (!indexHolder.otherStudentList) {
+                            StudentGrade grade = personLexicon.getCourseGradeByPerson(courseInfo.getClassInfoList().get(
+                                    indexHolder.listIndex).getStudents().get(indexHolder.studentIndex), courseInfo.getCourseName());
+                            grade.setValueAt(studentTable.getSelectedRow() / 2, studentTable.getSelectedColumn() - 1, newValue);
+                            personLexicon.insertStudentGrade(courseInfo.getClassInfoList().get(indexHolder.listIndex).getStudents().get(
+                                    indexHolder.studentIndex), grade, courseInfo.getCourseName());
+                        } else {
+                            StudentGrade grade = personLexicon.getCourseGradeByPerson(courseInfo.getOtherEnlistedStudents().get(
+                                    indexHolder.studentIndex), courseInfo.getCourseName());
+                            grade.setValueAt(studentTable.getSelectedRow() / 2, studentTable.getSelectedColumn() - 1, newValue);
+                            personLexicon.insertStudentGrade(courseInfo.getOtherEnlistedStudents().get(indexHolder.studentIndex),
+                                                             grade, courseInfo.getCourseName());
+                        }
+
+                        contentChanged = true;
+                        changePage = false;
+                        setupSummaryPage();
+                    }
+                    else {
+                        if (studentTable.getSelectedColumn() != 0 && studentTable.getSelectedColumn() != studentTable.getColumnCount()-1) {
+                            int newMaxPoint = 0;
+                            if (vector.get(studentTable.getSelectedColumn()).getClass().equals(String.class)) {
+                                newMaxPoint = Integer.parseInt((String) vector.get(studentTable.getSelectedColumn()));
+                            } else if (vector.get(studentTable.getSelectedColumn()).getClass().equals(Integer.class)) {
+                                newMaxPoint = (Integer) vector.get(studentTable.getSelectedColumn());
+                            }
+                            if (courseInfo.getCourseGoalModel().getMaxPoits().get(studentTable.getSelectedRow() / 2).get(studentTable.getSelectedColumn() - 1) != newMaxPoint) {
+                                courseInfo.getCourseGoalModel().getMaxPoits().get(studentTable.getSelectedRow() / 2).set(studentTable.getSelectedColumn() - 1, newMaxPoint);
+                                resetUpdateToOther(currentStudentPageIndex);
+                            }
                         }
                     }
-                    // parse the new value just typed in to just do i once
-                    int newValue = 0;
-                    if (vector.get(studentTable.getSelectedColumn()).getClass().equals(String.class)) {
-                        newValue = Integer.parseInt((String) vector.get(studentTable.getSelectedColumn()));
-                    }
-                    else if (vector.get(studentTable.getSelectedColumn()).getClass().equals(Integer.class)) {
-                        newValue = (Integer) vector.get(studentTable.getSelectedColumn());
-                    }
-
-                    studentTableModel.setValueAt(sum,studentTable.getSelectedRow(), courseInfo.getCourseGoalModel().getMilestone().size() + 1);
-
-                    // change the grade in the personLexicon
-                    if (currentStudentPageIndex - 1 < courseInfo.getClassInfo().getStudents().size()) {
-                        StudentGrade grade = personLexicon.getCourseGradeByPerson(courseInfo.getClassInfo().getStudents().get(currentStudentPageIndex-1), courseInfo.getCourseName());
-                        grade.setValueAt(studentTable.getSelectedRow(), studentTable.getSelectedColumn()-1, newValue);
-                        personLexicon.insertStudentGrade(courseInfo.getClassInfo().getStudents().get(currentStudentPageIndex-1), grade, courseInfo.getCourseName());
-                    } else {
-                        StudentGrade grade = personLexicon.getCourseGradeByPerson(courseInfo.getOtherEnlistedStudents().get(currentStudentPageIndex-1), courseInfo.getCourseName());
-                        grade.setValueAt(studentTable.getSelectedRow(), studentTable.getSelectedColumn()-1, newValue);
-                        personLexicon.insertStudentGrade(courseInfo.getOtherEnlistedStudents().get(currentStudentPageIndex-1), grade, courseInfo.getCourseName());
-                    }
-
-                    contentChanged = true;
-                    changePage = false;
-                    setupSummaryPage();
                 }
 
                 @Override
@@ -208,9 +358,12 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
             // adds the first column
             studentTableModel.addColumn("Goals");
             // adds all the columns of partGoals to this student table
-            for (int colIndex = 0; colIndex < courseInfo.getCourseGoalModel().getMilestone().size(); colIndex++) {
-                studentTableModel.addColumn(courseInfo.getCourseGoalModel().getMilestone().get(colIndex));
+            for (int gradeLevel = 0; gradeLevel < 3; gradeLevel++) {
+                for (int colIndex = 0; colIndex < courseInfo.getCourseGoalModel().getMilestone().size(); colIndex++) {
+                    studentTableModel.addColumn(courseInfo.getCourseGoalModel().getMilestone().get(colIndex)+": "+gradeLevelArrayChar[gradeLevel]);
+                }
             }
+
             studentTableModel.addColumn("Summary");
             //adds all the rows of data to this table, which is gotten from this students StudentGrade from personLexicon
             // and adds all of then to an ObjectArray which then is the full data row
@@ -225,6 +378,14 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
                     rowData[index] = grade[index-1];
                 }
                 studentTableModel.addRow(rowData);
+
+                // add the maxPoints for each objective
+                Object[] maxObjects = new Object[courseInfo.getCourseGoalModel().getMaxPoits().get(gradeRow).size()+1];
+                maxObjects[0] = "Objective Max Points";
+                for (int maxPointIndex = 0; maxPointIndex < courseInfo.getCourseGoalModel().getMaxPoits().get(gradeRow).size(); maxPointIndex++) {
+                    maxObjects[maxPointIndex+1] = courseInfo.getCourseGoalModel().getMaxPoits().get(gradeRow).get(maxPointIndex);
+                }
+                studentTableModel.addRow(maxObjects);
             }
 
             studentGradeContainer.add(new JScrollPane(studentTable));
@@ -233,30 +394,32 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
     }
 
     /**
-     * NEEEEEEEEEEEEEEEEEEEEEED to change so that other enlisted student also is with this
+     *
      */
     private void setupSummaryPage() {
         if (contentChanged) {
             summaryTableContainer.removeAll();
             DefaultTableModel summaryTableModel = new DefaultTableModel();
-            MyJTable summaryTable = new MyJTable(summaryTableModel, 0, courseInfo.getClassInfo().getStudents().size() + courseInfo.getOtherEnlistedStudents().size(), new ArrayList<>());
+
+            // makes Jtable with rows between 0 and given number un selectable
+            MyJTable summaryTable = new MyJTable(summaryTableModel, 0, courseInfo.getCourseGoalModel().getMilestone().size()*3+1, new ArrayList<>());
 
             summaryTableModel.addColumn("Students");
 
-            char[] gradeLevelArrayChar = new char[3];
-            gradeLevelArrayChar[0] = 'E';
-            gradeLevelArrayChar[1] = 'C';
-            gradeLevelArrayChar[2] = 'A';
-
-            for (int gradeLevel = 0; gradeLevel < 3; gradeLevel++) {
-                for (int goalModelRow = 0; goalModelRow < courseInfo.getCourseGoalModel().getObjective().size(); goalModelRow++) {
-                    summaryTableModel.addColumn(courseInfo.getCourseGoalModel().getObjective().get(goalModelRow)+" "+gradeLevelArrayChar[gradeLevel]);
+            for (int goalModelRow = 0; goalModelRow < courseInfo.getCourseGoalModel().getObjective().size(); goalModelRow++) {
+                for (int gradeLevel = 0; gradeLevel < 3; gradeLevel++) {
+                    summaryTableModel.addColumn(courseInfo.getCourseGoalModel().getObjective().get(goalModelRow) + " " +
+                                                gradeLevelArrayChar[gradeLevel]);
                 }
             }
-            //summaryTableModel.addColumn("Goals", courseInfo.getCourseGoalModel().getObjective().toArray());
+
 
             // goes through the students grades and sums them for each goal and show them in the summaryPage
-            summaryTableAddStudent(summaryTableModel, courseInfo.getClassInfo().getStudents());
+            for (int groupIndex = 0; groupIndex < courseInfo.getClassInfoList().size(); groupIndex++) {
+                if (!courseInfo.getClassInfoList().get(groupIndex).getClassName().equals("No Class")) {
+                    summaryTableAddStudent(summaryTableModel, courseInfo.getClassInfoList().get(groupIndex).getStudents());
+                }
+            }
             summaryTableAddStudent(summaryTableModel, courseInfo.getOtherEnlistedStudents());
 
             summaryTableContainer.add(new JScrollPane(summaryTable));
@@ -284,7 +447,7 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
         changePage = true;
         contentChanged = true;
         setupSummaryPage();
-        reMakeStudentListSelecter(courseInfo);
+        reMakeStudentListSelector(courseInfo);
     }
 
     //used when the summaryPage is setup
@@ -358,6 +521,21 @@ public class StudentCourseGrade implements main.Interfaces.Panel {
 
     public JPanel getPageHolder() {
         return pageHolder;
+    }
+
+
+    private class ClassInfoListIndexHolder {
+        public int listIndex;
+        public int studentIndex;
+        public boolean otherStudentList;
+        public int totalIndex;
+
+        public ClassInfoListIndexHolder(int listIndex, int studentIndex, boolean otherStudentList, int totalIndex) {
+            this.listIndex = listIndex;
+            this.studentIndex = studentIndex;
+            this.otherStudentList = otherStudentList;
+            this.totalIndex = totalIndex;
+        }
     }
 }
 

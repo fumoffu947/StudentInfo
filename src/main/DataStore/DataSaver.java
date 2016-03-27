@@ -3,7 +3,6 @@ package main.DataStore;
 import main.DataStore.Lexicon.PersonLexicon;
 
 import java.io.BufferedOutputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Base64;
@@ -33,11 +32,9 @@ public class DataSaver implements Runnable {
         try {
             // saving the persons and grade for the students
             BufferedOutputStream fileWriter = new BufferedOutputStream(new FileOutputStream("content/Students.txt"));
-            System.out.println("found students.txt");
             personLexicon.saveLexicon(fileWriter);
             fileWriter.flush();
             fileWriter.close();
-            System.out.println("done with personLexicon");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -94,7 +91,13 @@ public class DataSaver implements Runnable {
                 stringBuilder.append(";");
 
                 // writhe the name for the class to add to the course to get from the YearHolderPage (May change name to Groups or similar)
-                stringBuilder.append(courses.get(courseIndex).getClassInfo().getClassName());
+                for (int i = 0; i < courses.get(courseIndex).getClassInfoList().size(); i++) {
+                    stringBuilder.append(courses.get(courseIndex).getClassInfoList().get(i).getClassName());
+                    if (i != courses.get(courseIndex).getClassInfoList().size()-1) {
+                        stringBuilder.append(",");
+                    }
+                }
+
                 // end of info 2
                 stringBuilder.append(";");
 
@@ -168,10 +171,14 @@ public class DataSaver implements Runnable {
         }
 
         try {
-            BufferedOutputStream fileWriter = new BufferedOutputStream(new FileOutputStream("content/Students.txt"));
+            BufferedOutputStream fileWriter = new BufferedOutputStream(new FileOutputStream("content/Settings.txt"));
             StringBuilder stringBuilder = new StringBuilder();
+
+            // appending the last id Used
             stringBuilder.append(settingsLoader.getLastIDNumber());
 
+            //appending all the scatterd numbers of removed persons
+            stringBuilder.append(":");
             for (int scatterIndex = 0; scatterIndex < settingsLoader.getScatteredIDNumbers().size(); scatterIndex++) {
                 stringBuilder.append(settingsLoader.getScatteredIDNumbers().get(scatterIndex));
                 if (scatterIndex != settingsLoader.getScatteredIDNumbers().size()-1) {

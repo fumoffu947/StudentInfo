@@ -71,6 +71,7 @@ public class PersonLexicon {
         recursiveSave(outputStream, startNode);
         try {
             outputStream.write("{".getBytes());
+            outputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -200,8 +201,10 @@ public class PersonLexicon {
                                 }
                             }
                             // write the encoded person
+                            byte[] a = Base64.getEncoder().encode(stringBuilder.toString().getBytes());
                             outputStream.write(Base64.getEncoder().encode(stringBuilder.toString().getBytes()));
                             stringBuilder.delete(0, stringBuilder.length()-1);
+                            outputStream.flush();
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

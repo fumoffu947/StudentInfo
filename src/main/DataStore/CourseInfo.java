@@ -2,7 +2,6 @@ package main.DataStore;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * Created by fumoffu on 2015-10-20.
@@ -15,24 +14,25 @@ import java.util.Vector;
  */
 public class CourseInfo {
 
-    private ClassInfo classInfo;
+    private List<ClassInfo> classInfoList;
     private List<Student> otherEnlistedStudents;
     private String courseName;
     private List<Teacher> teachers;
     private CourseGoalModel courseGoalModel;
+    private List<Student> listOfRemovedGroupStudents = new ArrayList<>();
 
-    public CourseInfo(final ClassInfo classInfo, final List<Student> otherEnlistedStudents, final String courseName,
+    public CourseInfo(final List<ClassInfo> classInfoList, final List<Student> otherEnlistedStudents, final String courseName,
                       final List<Teacher> teachers, CourseGoalModel courseGoalModel) {
 
-        this.classInfo = classInfo;
+        this.classInfoList = classInfoList;
         this.otherEnlistedStudents = otherEnlistedStudents;
         this.courseName = courseName;
         this.teachers = teachers;
         this.courseGoalModel = courseGoalModel;
     }
 
-    public ClassInfo getClassInfo() {
-	return classInfo;
+    public List<ClassInfo> getClassInfoList() {
+	return classInfoList;
     }
 
     public List<Student> getOtherEnlistedStudents() {
@@ -47,8 +47,8 @@ public class CourseInfo {
 	return teachers;
     }
 
-    public void setClassInfo(final ClassInfo classInfo) {
-	this.classInfo = classInfo;
+    public void setClassInfoList(final List<ClassInfo> classInfoList) {
+	this.classInfoList = classInfoList;
     }
 
     public void setOtherEnlistedStudents(final List<Student> otherEnlistedStudents) {
@@ -68,7 +68,7 @@ public class CourseInfo {
     }
 
     public boolean removeStudent(Student student) {
-        return classInfo.removeClassInfoStudent(student);
+        return listOfRemovedGroupStudents.add(student);
     }
 
     public boolean removeOtherEnlistedStudent(Student student) {
