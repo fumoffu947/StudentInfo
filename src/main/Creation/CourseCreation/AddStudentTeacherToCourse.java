@@ -24,6 +24,7 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
     private final List<ClassInfo> classIfs;
     private final String courseName;
     private final SwitchToStudentCourseGrade switchToStudentCourseGrade;
+    private final CourseGradeModel courseGradeModel;
     /**
      * behöver en  courseData/info class som behöver skapas
      * en gridBagLayout som ska ha 2 fält
@@ -50,12 +51,13 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
     private JTable teacherSearchResultTable = new JTable(teacherSearchResultTableModel);
 
     public AddStudentTeacherToCourse(PersonLexicon personLexicon, JMenuBar jMenuBar, RePackWindow rePackWindow,
-                                     String courseName, CourseGoalModel courseGoalModel, List<ClassInfo> classIfs,
-                                     SwitchToStudentCourseGrade switchToStudentCourseGrade) {
+                                     String courseName, CourseGoalModel courseGoalModel, CourseGradeModel courseGradeModel,
+                                     List<ClassInfo> classIfs, SwitchToStudentCourseGrade switchToStudentCourseGrade) {
 
         this.personLexicon = personLexicon;
         this.rePackWindow = rePackWindow;
         this.courseGoalModel = courseGoalModel;
+        this.courseGradeModel = courseGradeModel;
         this.classIfs = classIfs;
         this.courseName = courseName;
         this.switchToStudentCourseGrade = switchToStudentCourseGrade;
@@ -117,7 +119,7 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
                 }
                 insertNewGradeForStudentToCourse(students);
 
-                switchToStudentCourseGrade.switchToCourseGradePageAndAddCourseInfo(new CourseInfo(classIfs,students,courseName,teachers,courseGoalModel));
+                switchToStudentCourseGrade.switchToCourseGradePageAndAddCourseInfo(new CourseInfo(classIfs,students,courseName,teachers,courseGoalModel,courseGradeModel));
                 rePackWindow.rePackWindow();
             }
         });

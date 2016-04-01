@@ -1,5 +1,6 @@
 package main.DataStore.Lexicon;
 
+import main.DataStore.SettingsLoader;
 import main.DataStore.Student;
 import main.DataStore.StudentGrade;
 import main.DataStore.Teacher;
@@ -8,9 +9,11 @@ import main.Interfaces.PersonSearchFunction;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by philip on 2016-01-13.
+ * lexicon to store all the persons in the program (should switch to a DataBase)
  */
 public class PersonLexicon {
 
@@ -188,9 +191,7 @@ public class PersonLexicon {
                                     for (int row = 0; row < currentGrade.getGrades().size(); row++) {
                                         for (int col = 0; col < currentGrade.getGrades().get(row).size(); col++) {
                                             stringBuilder.append(currentGrade.getGrades().get(row).get(col));
-                                            if (row == currentGrade.getGrades().size()-1 && col == currentGrade.getGrades().get(row).size()-1) {
-                                                continue;
-                                            }else {
+                                            if (row != currentGrade.getGrades().size()-1 || col != currentGrade.getGrades().get(row).size()-1) {
                                                 stringBuilder.append(",");
                                             }
                                         }
@@ -201,7 +202,6 @@ public class PersonLexicon {
                                 }
                             }
                             // write the encoded person
-                            byte[] a = Base64.getEncoder().encode(stringBuilder.toString().getBytes());
                             outputStream.write(Base64.getEncoder().encode(stringBuilder.toString().getBytes()));
                             stringBuilder.delete(0, stringBuilder.length()-1);
                             outputStream.flush();
@@ -337,9 +337,108 @@ public class PersonLexicon {
             currentNode = currentNode.getChildWithChar(student.getFirstName().charAt(namePos));
             namePos++;
         }
-        if (namePos == student.getFirstName().length()) {
-            return currentNode.insertStudentGradeToCourseMap(student,studentGrade,courseName);
+        return namePos == student.getFirstName().length() && currentNode.insertStudentGradeToCourseMap(student, studentGrade, courseName);
+    }
+
+
+    /**
+     * Removes the given person from the lexicon and all grades associated with that person
+     * @param person
+     * given person to remove from the lexicon
+     * @return
+     * return true if the person exists and was removed else false
+     */
+    public boolean removePerson(Person person, SettingsLoader settingsLoader) {
+        LexiconNode previousNode = null;
+        LexiconNode currentNode = startNode;
+        int charPos = 0;
+        // look for the given person through the lexiconNodes
+        while (charPos < person.getFirstName().length() && currentNode.containsChildWithChar(person.getFirstName().charAt(charPos))) {
+            previousNode = currentNode;
+            currentNode = currentNode.getChildWithChar(person.getFirstName().charAt(charPos));
+            charPos++;
+        }if (charPos == person.getFirstName().length() && currentNode.containsName(person.getFirstName())) {
+            HashMap<String,Collection<Person>> namesMap = currentNode.getNamesMap();
+            Collection<Person> personCollection = namesMap.get(person.getFirstName());
+            if (personCollection.removeIf((Person p)->p.getID() == person.getID())) {
+                // removes the link to this node if this was the last person in this node and no link further
+                if (personCollection.isEmpty()) {
+                    //removes the personName (collection) from the namesMap
+                    currentNode.getNamesMap().remove(person.getFirstName());
+                    // removes the link to this node if there is no more persons in this node and no more after this node
+                    if (currentNode.getNamesMap().isEmpty() && currentNode.getChildren().isEmpty() && previousNode != null) {
+                        previousNode.getChildren().remove(person.getFirstName().charAt(person.getFirstName().length()-1));
+                    }
+                }
+                currentNode.getGrades().remove(person.getID());
+                settingsLoader.addScatterdIdNumber(person.getID());
+                return true;
+            }
         }
         return false;
+    }
+
+
+    /**
+     * This is meant to get all the students in the lexicon
+     * it goes through all the nodes and add all the persons who
+     * is a student to a list and then return the list to the caller
+     * @return
+     * A list of all the student currently in the lexicon
+     */
+    public List<Student> getAllStudents() {
+        List<Student> students = new ArrayList<>();
+        LexiconNode currentNode = startNode;
+        Stack<LexiconNode> operatingStack = new Stack<>();
+        while(true) {
+            for (String name : currentNode.getNamesMap().keySet()) {
+                Collection<Person> personsCollection = currentNode.getNamesMap().get(name);
+                //goes through all the persons and if it is not a teacher the person is added to the students
+                students.addAll(personsCollection.stream().filter(person->!person.isTeacher()).map(person ->(Student) person).collect(Collectors.toList()));
+            }
+            // add all the children to the stack to be processed
+            for(char nextChildChar : currentNode.getChildren().keySet()) {
+                operatingStack.add(currentNode.getChildWithChar(nextChildChar));
+            }
+
+            if (operatingStack.isEmpty()) {
+                break;
+            } else {
+                currentNode = operatingStack.pop();
+            }
+        }
+        return students;
+    }
+
+    public List<String> getCourseNamesForPerson(Person person) {
+        LexiconNode currentNode = startNode;
+        int charPos = 0;
+        // look for the given person through the lexiconNodes
+        while (charPos < person.getFirstName().length() && currentNode.containsChildWithChar(person.getFirstName().charAt(charPos))) {
+            currentNode = currentNode.getChildWithChar(person.getFirstName().charAt(charPos));
+            charPos++;
+        }
+        if (charPos == person.getFirstName().length()) {
+            return currentNode.getCourseNamesByID(person.getID());
+        }
+
+        return new ArrayList<>();
+    }
+
+    public void removeCourseFromPresons(List<Student> persons, String courseName) {
+        int personPos = 0;
+        while(personPos < persons.size()) {
+            Person p = persons.get(personPos);
+            LexiconNode currentNode = startNode;
+            int charPos = 0;
+            while(charPos < p.getFirstName().length() && currentNode.containsChildWithChar(p.getFirstName().charAt(charPos))) {
+                currentNode = currentNode.getChildWithChar(p.getFirstName().charAt(charPos));
+                charPos++;
+            }
+            if (charPos == p.getFirstName().length()) {
+                currentNode.getGrades().get(p.getID()).remove(courseName);
+            }
+            personPos++;
+        }
     }
 }

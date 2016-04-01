@@ -1,6 +1,8 @@
 package main.DataStore;
 
 import main.DataStore.Lexicon.PersonLexicon;
+import main.DataStore.ShowPages.CoursesPage;
+import main.DataStore.ShowPages.YearHolderPage;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
@@ -158,7 +160,33 @@ public class DataSaver implements Runnable {
                 // end of info 5
                 stringBuilder.append(";");
 
+                // add all the removed students from the groups
+                // adding all the persons ID with "," as separator between persons
+                for (int removedIndex = 0; removedIndex < courses.get(courseIndex).getListOfRemovedGroupStudents().size(); removedIndex++) {
+                    stringBuilder.append(courses.get(courseIndex).getListOfRemovedGroupStudents().get(removedIndex));
+                    if (removedIndex != courses.get(courseIndex).getListOfRemovedGroupStudents().size()-1) {
+                        stringBuilder.append(",");
+                    }
+                }
+                // random solution on a random problem when the split function randomly started so malfunction in loadCourseFromString()
+                stringBuilder.append(",");
+                // end of info 6
+                stringBuilder.append(";");
 
+                // add all the gradeLevels for each objective
+                for (int gradeRow = 0; gradeRow < courses.get(courseIndex).getCourseGradeModel().getGradeLevels().size(); gradeRow++) {
+                    for (int gradeCol = 0; gradeCol < courses.get(courseIndex).getCourseGradeModel().getGradeLevels().get(gradeRow).size(); gradeCol++) {
+                        stringBuilder.append(courses.get(courseIndex).getCourseGradeModel().getGradeLevels().get(gradeRow).get(gradeCol));
+                        if (gradeCol != courses.get(courseIndex).getCourseGradeModel().getGradeLevels().get(gradeRow).size()-1) {
+                            stringBuilder.append(",");
+                        }
+                    }
+                    if (gradeRow != courses.get(courseIndex).getCourseGradeModel().getGradeLevels().size()-1) {
+                        stringBuilder.append(":");
+                    }
+                }
+                // end of info 7
+                stringBuilder.append(";");
 
                 fileWriter.write(Base64.getEncoder().encode(stringBuilder.toString().getBytes()));
             }

@@ -1,7 +1,9 @@
-package main.DataStore;
+package main.DataStore.ShowPages;
 
 import main.Comparators.ClassInfoComparator;
+import main.DataStore.ClassInfo;
 import main.DataStore.Lexicon.PersonLexicon;
+import main.DataStore.Student;
 import main.Interfaces.*;
 import main.Interfaces.InterfaceDataTransfer.StudentClicked;
 
@@ -23,19 +25,21 @@ import java.util.List;
  * Created by fumoffu on 2015-10-24.
  */
 public class YearHolderPage implements main.Interfaces.Panel {
+
     private final RePackWindow rePackWindow;
+    private StudentClicked studentClicked;
     private List<ClassInfo> classes;
+
     private JPanel pageHolder = new JPanel(new BorderLayout());
     private JPanel classContainer = new JPanel(new GridBagLayout());
-    private StudentClicked studentClicked;
-    private List<DefaultTableModel> tableModels = new ArrayList<>();
+
     private int tableNr = 0;
     private boolean startSetup = true;
 
 
     public YearHolderPage(final List<ClassInfo> classes, StudentClicked studentClicked, RePackWindow rePackWindow) {
         this.classes = classes;
-        classes.add(0,new ClassInfo(new ArrayList<Student>(),"No Class"));
+        classes.add(0,new ClassInfo(new ArrayList<>(),"No Class"));
         this.classes.sort(new ClassInfoComparator());
         this.studentClicked = studentClicked;
         this.rePackWindow = rePackWindow;
@@ -44,7 +48,7 @@ public class YearHolderPage implements main.Interfaces.Panel {
 
     public YearHolderPage(BufferedInputStream fileReader, PersonLexicon personLexicon, StudentClicked studentClicked, RePackWindow rePackWindow) {
         this.classes = new ArrayList<>();
-        classes.add(new ClassInfo(new ArrayList<Student>(),"No Class"));
+        classes.add(new ClassInfo(new ArrayList<>(),"No Class"));
         this.studentClicked = studentClicked;
         this.rePackWindow = rePackWindow;
 
@@ -131,13 +135,16 @@ public class YearHolderPage implements main.Interfaces.Panel {
         removeClassButton.setAction(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                classes.remove(aClass);
-                classContainer.remove(jScrollPane);
-                classContainer.remove(removeClassButton);
-                rePackWindow.rePackWindow();
+                int answer = JOptionPane.showConfirmDialog(null,"Are you sure that you want to remove this class?","Class Removal",JOptionPane.YES_NO_OPTION,JOptionPane.WARNING_MESSAGE);
+                if (answer == JOptionPane.YES_OPTION) {
+                    classes.remove(aClass);
+                    classContainer.remove(jScrollPane);
+                    classContainer.remove(removeClassButton);
+                    rePackWindow.rePackWindow();
+                }
             }
         });
-        removeClassButton.setText("Remove Class");
+        removeClassButton.setText("Remove Group");
 
         GridBagConstraints removeButtonConstraints = new GridBagConstraints();
         removeButtonConstraints.gridx = tableNr;

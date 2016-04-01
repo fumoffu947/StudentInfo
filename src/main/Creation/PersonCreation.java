@@ -109,7 +109,7 @@ public class PersonCreation implements main.Interfaces.Panel
                         for (Person p: personsCollection) {
                             if (student.toString().equals(p.toString())) {
                                 String newLine = System.getProperty("line.separator");
-                                samePerson = JOptionPane.showConfirmDialog((Component)null,"A person by the same name, middle names, surname and age"+
+                                samePerson = JOptionPane.showConfirmDialog((Component)null,"A person by the same name, middle names and surname "+
                                         newLine + " was found do you still wish to add this new person?","Warning Person Exists",JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                                 break;
                             }
@@ -121,15 +121,16 @@ public class PersonCreation implements main.Interfaces.Panel
                                 if (!gotScatterd) {
                                     settingsLoader.setLastIDNumber(nextID+1);
                                 }
-                                JOptionPane.showMessageDialog(null, "A student by name : "+student+" was created.","Student Creation",JOptionPane.INFORMATION_MESSAGE);
+                                JOptionPane.showMessageDialog(null, "A person by name : "+student+" was created.","Person Creation",JOptionPane.INFORMATION_MESSAGE);
                             }else {
-                                JOptionPane.showMessageDialog(null,"An error occurred and the student was not created.",
-                                        "Student Creation",JOptionPane.WARNING_MESSAGE);
+                                JOptionPane.showMessageDialog(null,"An error occurred and the person was not created.",
+                                        "Person Creation",JOptionPane.WARNING_MESSAGE);
                             }
 
                         }
                     } else {
                         personLexicon.insertPersonToLexicon(student.getFirstName(), student);
+                        JOptionPane.showMessageDialog(null, "A person by name : "+student+" was created.","Person Creation",JOptionPane.INFORMATION_MESSAGE);
                         scr.returnStudent(student);
                         if (!gotScatterd) {
                             settingsLoader.setLastIDNumber(nextID+1);
@@ -137,9 +138,9 @@ public class PersonCreation implements main.Interfaces.Panel
                     }
                 }else {
                     String newLine = System.getProperty("line.separator");
-                    JOptionPane.showMessageDialog(null, "Student was not created."+newLine+
+                    JOptionPane.showMessageDialog(null, "Person was not created."+newLine+
                             "The name field must me filled with at least one name."+newLine+
-                            "Surname must be of at least two characters.","Student Creation",JOptionPane.INFORMATION_MESSAGE);
+                            "Surname must be of at least two characters.","Person Creation",JOptionPane.INFORMATION_MESSAGE);
                 }
                 nameField.setText("");
                 lastNameField.setText("");
@@ -148,7 +149,7 @@ public class PersonCreation implements main.Interfaces.Panel
 
             }
         });
-        createButton.setText("Add Student");
+        createButton.setText("Add Person");
     }
 
     public JPanel getPageHolder() {

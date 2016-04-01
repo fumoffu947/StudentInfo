@@ -6,6 +6,7 @@ import main.DataStore.Lexicon.PersonLexicon;
 import main.DataStore.Student;
 import main.Interfaces.*;
 import main.Interfaces.InterfaceDataTransfer.AddToYearHolderPage;
+import main.Interfaces.PaneInterfaceSwitches.GroupSwitch;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -23,7 +24,7 @@ import java.util.List;
 public class CreateYearClass implements main.Interfaces.Panel {
 
     private final AddToYearHolderPage addToYearHolderPage;
-    private final RePackWindow rePackWindow;
+    private final GroupSwitch groupSwitch;
     private JButton continueButton;
     private List<Student> studentGroup = new ArrayList<>();
     private PersonLexicon personLexicon;
@@ -38,20 +39,18 @@ public class CreateYearClass implements main.Interfaces.Panel {
     private JTable inCourseTable = new JTable(inClassTableModel);
     private JTable searchResultTable = new JTable(searchResultTableModel);
 
-    public CreateYearClass(PersonLexicon personLexicon, RePackWindow rePackWindow,
-                           JMenuBar jMenuBar, AddToYearHolderPage addToYearHolderPage) {
+    public CreateYearClass(PersonLexicon personLexicon,
+                           AddToYearHolderPage addToYearHolderPage, GroupSwitch groupSwitch) {
         this.personLexicon = personLexicon;
-        this.rePackWindow = rePackWindow;
         this.addToYearHolderPage = addToYearHolderPage;
-
-        setupMenuButtons(rePackWindow, jMenuBar, addToYearHolderPage);
+        this.groupSwitch = groupSwitch;
 
         studentSearchFieldBoxSetup(pageHolder);
         studentSearchResultBoxSetup(pageHolder);
         studentsInCourseBoxSetup(pageHolder);
     }
 
-    private void setupMenuButtons(final RePackWindow rePackWindow, final JMenuBar jMenuBar, final AddToYearHolderPage addToYearHolderPage) {
+    private void setupMenuButtons(final JMenuBar jMenuBar, final AddToYearHolderPage addToYearHolderPage) {
         this.continueButton = new JButton();
         continueButton.setAction(new AbstractAction() {
             @Override
@@ -64,7 +63,7 @@ public class CreateYearClass implements main.Interfaces.Panel {
                 if (name.length() > 0 && !studentGroup.isEmpty()) {
                     addToYearHolderPage.addClass(new ClassInfo(studentGroup, name));
                     clearMenuBar(jMenuBar);
-                    rePackWindow.rePackWindow();
+                    groupSwitch.switchToGroupPage();
                 }
                 else {
                     studentGroup.clear();
@@ -81,7 +80,7 @@ public class CreateYearClass implements main.Interfaces.Panel {
 
     @Override
     public void setupMenuBar(JMenuBar jMenuBar) {
-        setupMenuButtons(rePackWindow, jMenuBar, addToYearHolderPage);
+        setupMenuButtons(jMenuBar, addToYearHolderPage);
     }
 
     private void updateSearchResultTableModel(JTextField teacherSearchField, DefaultTableModel tableModel, String whichUpdate) {

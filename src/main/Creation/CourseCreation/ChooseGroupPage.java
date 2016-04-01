@@ -1,9 +1,6 @@
 package main.Creation.CourseCreation;
 
-import main.DataStore.ClassInfo;
-import main.DataStore.CourseGoalModel;
-import main.DataStore.MyJTable;
-import main.DataStore.Student;
+import main.DataStore.*;
 import main.Interfaces.PaneInterfaceSwitches.SwitchToAddStudentTeacherToCourse;
 import main.Interfaces.Panel;
 
@@ -23,11 +20,11 @@ public class ChooseGroupPage implements Panel {
     private JButton continueButton;
 
 
-    private ChooseGroupeTableModel classesTableModel = new ChooseGroupeTableModel();
+    private ChooseGroupTableModel classesTableModel = new ChooseGroupTableModel();
     private MyJTable classesTable = new MyJTable(classesTableModel,0,1,new ArrayList<>());
 
     public ChooseGroupPage(List<ClassInfo> classes, SwitchToAddStudentTeacherToCourse switchToAddStudentTeacherToCourse,
-                           String courseName, CourseGoalModel courseGoalModel, JMenuBar jMenuBar) {
+                           String courseName, CourseGoalModel courseGoalModel, CourseGradeModel courseGradeModel, JMenuBar jMenuBar) {
 
 
         classesTableModel.addColumn("Group Name");
@@ -60,7 +57,7 @@ public class ChooseGroupPage implements Panel {
                 if (classInfos.isEmpty()) {
                     classInfos.add(noClassInfo);
                 }
-                switchToAddStudentTeacherToCourse.startAddStudentTeacherToCourse(courseName, courseGoalModel, classInfos);
+                switchToAddStudentTeacherToCourse.startAddStudentTeacherToCourse(courseName, courseGoalModel, courseGradeModel, classInfos);
             }
         });
         continueButton.setText("Continue");
@@ -102,7 +99,7 @@ public class ChooseGroupPage implements Panel {
         return pageHolder;
     }
 
-    private class ChooseGroupeTableModel extends DefaultTableModel {
+    private class ChooseGroupTableModel extends DefaultTableModel {
 
         @Override public Class<?> getColumnClass(final int columnIndex) {
             switch (columnIndex) {

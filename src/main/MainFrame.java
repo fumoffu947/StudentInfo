@@ -8,21 +8,22 @@ import main.Creation.GetListOfStudents;
 import main.Creation.PersonCreation;
 import main.DataStore.*;
 import main.DataStore.Lexicon.PersonLexicon;
+import main.DataStore.ShowPages.*;
 import main.Interfaces.*;
 import main.Interfaces.InterfaceDataTransfer.*;
+import main.Interfaces.PaneInterfaceSwitches.GroupSwitch;
 import main.Interfaces.PaneInterfaceSwitches.SwitchToAddStudentTeacherToCourse;
 import main.Interfaces.PaneInterfaceSwitches.SwitchToStudentCourseGrade;
 import main.Interfaces.Panel;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
 /**
  * Created by fumoffu on 2015-10-20.
@@ -38,6 +39,8 @@ public class MainFrame extends JFrame {
     private GroupDataTransfer groupDataTransfer;
     private SwitchToGivenPanel switchToGivenPanel;
     private StartGetListOfStudents startGetListOfStudents;
+    private CourseInfoTransfer courseInfoTransfer;
+    private GroupSwitch groupSwitch;
     private SwitchToStudentCourseGrade switchToStudentCourseGrade = new SwitchToStudentCourseGrade() {
         @Override
         public void switchToCourseGradePage(CourseInfo courseInfo) {
@@ -56,6 +59,7 @@ public class MainFrame extends JFrame {
     private PanelHistoryStore panelHistoryStore = new PanelHistoryStore();
     private CoursesPage coursesPage;
     private SettingsLoader settingsLoader;
+    private FrontPage frontPage = new FrontPage();
     private JFrame mainFrame = this;
 
     public static void main(String[] args) {
@@ -86,7 +90,8 @@ public class MainFrame extends JFrame {
         this.startGetListOfStudents = new StartGetListOfStudents() {
             @Override
             public void startGetStudents(StudentCourseGrade studentCourseGrade) {
-                setNewPage(new GetListOfStudents(personLexicon,rePackWindow,mainFrame.getJMenuBar(),switchToGivenPanel,studentCourseGrade));
+                setNewPage(new GetListOfStudents(personLexicon,rePackWindow,mainFrame.getJMenuBar(),switchToGivenPanel,
+                                                    studentCourseGrade));
             }
         };
 
@@ -101,6 +106,20 @@ public class MainFrame extends JFrame {
             @Override
             public ClassInfo getClassInfoByName(String className) {
                 return yearHolderPage.getClassInfoByName(className);
+            }
+        };
+
+        this.groupSwitch = new GroupSwitch() {
+            @Override
+            public void switchToGroupPage() {
+                setNewPage(yearHolderPage);
+            }
+        };
+
+        this.courseInfoTransfer = new CourseInfoTransfer() {
+            @Override
+            public CourseInfo getCourseInfoByName(String name) {
+                return coursesPage.getCourseByName(name);
             }
         };
 
@@ -131,17 +150,33 @@ public class MainFrame extends JFrame {
 
         this.switchToAddStudentTeacherToCourse = new SwitchToAddStudentTeacherToCourse() {
             @Override
-            public void startAddStudentTeacherToCourse(String courseName, CourseGoalModel courseGoalModel, java.util.List<ClassInfo> classInfo) {
-                setNewPage(new AddStudentTeacherToCourse(personLexicon,mainFrame.getJMenuBar(), rePackWindow,courseName, courseGoalModel,classInfo,switchToStudentCourseGrade));
+            public void startAddStudentTeacherToCourse(String courseName, CourseGoalModel courseGoalModel, CourseGradeModel courseGradeModel, List<ClassInfo> classInfo) {
+                setNewPage(new AddStudentTeacherToCourse(personLexicon,mainFrame.getJMenuBar(), rePackWindow,courseName,
+                            courseGoalModel,courseGradeModel,classInfo,switchToStudentCourseGrade));
             }
 
             @Override
-            public void startChooseGroupPage(String courseName, CourseGoalModel courseGoalModel) {
+            public void startChooseGroupPage(String courseName, CourseGoalModel courseGoalModel, CourseGradeModel courseGradeModel) {
                 setNewPage(new ChooseGroupPage(yearHolderPage.getClasses(), switchToAddStudentTeacherToCourse, courseName,
-                        courseGoalModel, mainFrame.getJMenuBar()));
+                        courseGoalModel, courseGradeModel, mainFrame.getJMenuBar()));
             }
         };
 
+
+
+        setLayout(new BorderLayout());
+
+        addMenu();
+
+        startLoad();
+
+        setNewPage(frontPage);
+
+        this.pack();
+        this.setVisible(true);
+    }
+
+    private void startLoad() {
         try {
             settingsLoader = new SettingsLoader(new BufferedInputStream(new FileInputStream("content/Settings.txt")));
         } catch (FileNotFoundException e) {
@@ -155,92 +190,19 @@ public class MainFrame extends JFrame {
         }
 
         try {
-            yearHolderPage = new YearHolderPage(new BufferedInputStream(new FileInputStream("content/Groups.txt")), personLexicon,studentClicked,rePackWindow);
+            yearHolderPage = new YearHolderPage(new BufferedInputStream(new FileInputStream("content/Groups.txt")),
+                    personLexicon,studentClicked,rePackWindow);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             yearHolderPage = new YearHolderPage(new ArrayList<>(),studentClicked,rePackWindow);
         }
 
         try {
-            coursesPage = new CoursesPage(new BufferedInputStream(new FileInputStream("content/Courses.txt")),personLexicon,groupDataTransfer,switchToStudentCourseGrade);
+            coursesPage = new CoursesPage(new BufferedInputStream(new FileInputStream("content/Courses.txt")),
+                    personLexicon,groupDataTransfer,switchToStudentCourseGrade,mainFrame.getJMenuBar());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
-        setLayout(new BorderLayout());
-
-        addMenu();
-
-        //addExampleTextFields();
-
-        //exampleClassInfoPage();
-
-
-/*
-        ArrayList<String> name = new ArrayList<>();
-        name.add("aaaa");
-        name.add("aaaa");
-        Student s = new Student(name, "aa", 0, "070", "@hotmail.com", 1);
-        ArrayList<String> name2 = new ArrayList<>();
-        name2.add("aaaa");
-        name2.add("aaaab");
-        Student s2 = new Student(name2, "aa", 0, "070", "@hotmail.com", 2);
-        System.out.println(personLexicon.insertPersonToLexicon(s.getFirstName(), s));
-        System.out.println(personLexicon.insertPersonToLexicon(s.getFirstName(), s));
-        System.out.println(personLexicon.insertPersonToLexicon(s2.getFirstName(), s2));*/
-        System.out.println(personLexicon.containsPrefix("a"));
-        System.out.println(personLexicon.containsPrefix("aa"));
-        System.out.println(personLexicon.containsPrefix("aaa"));
-        System.out.println(personLexicon.containsPrefix("aaaa"));
-        System.out.println(personLexicon.containsPrefix("aaaaa"));
-        Collection<Person> collection = personLexicon.getPersonsByName("aaaa");
-        Collection<Student> coll = new ArrayList<>();
-        ArrayList<Integer> sg1 = new ArrayList<>();
-        sg1.add(1);
-        sg1.add(1);
-        sg1.add(1);
-        sg1.add(1);
-        ArrayList<Integer> sg2 = new ArrayList<>();
-        sg2.add(1);
-        sg2.add(1);
-        sg2.add(1);
-        sg2.add(1);
-        ArrayList<Integer> sg3 = new ArrayList<>();
-        sg3.add(1);
-        sg3.add(1);
-        sg3.add(1);
-        sg3.add(1);
-        ArrayList<ArrayList<Integer>> grade = new ArrayList<>();
-        grade.add(sg1);
-        grade.add(sg2);
-        grade.add(sg3);
-        for (Person p : collection) {
-            if (!p.isTeacher()) {
-                System.out.println(p.toString());
-                coll.add((Student)p);
-                //System.out.println(personLexicon.insertStudentGrade((Student) p,new StudentGrade(grade),"Test"));
-
-            }
-        }
-
-        //AddStudentTeacherToCourse addStudentTeacherToCourse = new AddStudentTeacherToCourse(personLexicon, 	getJMenuBar(),rePackWindow);
-        //this.setContentPane(addStudentTeacherToCourse.getPageHolder());
-
-
-        //ClassInfo cI = new ClassInfo(new ArrayList<Student>(coll),"Test");
-        //CourseGoalModel cGM = new CourseGoalModel(new ArrayList<String>(Arrays.asList("test1","test2","test3")), new ArrayList<>(Arrays.asList("partgoal1", "partgoal2","partgoal1", "partgoal2")));
-        //CourseInfo c = new CourseInfo(cI,new ArrayList<Student>(),"Test",new ArrayList<Teacher>(),cGM);
-
-        //yearHolderPage.addClassToPage(cI);
-        //coursesPage.addCourse(c);
-
-        //setContentPane(new StudentCourseGrade(c, getJMenuBar(),personLexicon, rePackWindow, startGetListOfStudents).getPageHolder());
-        this.pack();
-        this.setVisible(true);
-
-        //DataSaver dataSaver = new DataSaver(personLexicon, yearHolderPage,coursesPage);
-        //System.out.println("starting saving");
-        //dataSaver.run();
     }
 
     private void setupContentDir() {
@@ -280,61 +242,13 @@ public class MainFrame extends JFrame {
         }
     }
 
-    private void exampleClassInfoPage() {
-        ArrayList<Student> students = new ArrayList<>();
-        ArrayList<String> name = new ArrayList<>();
-        name.add("aaaa");
-        name.add("aaaa");
-        students.add(new Student(name, "aaab", 0, "aaaa", "aaaa", 1));
-        students.add(new Student(name, "aabb", 0, "aaaa", "aaaa", 2));
-        students.add(new Student(name, "abbb", 0, "aaaa", "aaaa", 3));
-        students.add(new Student(name, "bbbb", 0, "aaaa", "aaaa", 4));
-
-        ClassInfo ca1 = new ClassInfo(students, "åk1");
-        ClassInfo ca2 = new ClassInfo(students, "åk2");
-        ClassInfo ca3 = new ClassInfo(students, "åk3");
-
-        ArrayList<ClassInfo> list = new ArrayList<>();
-        list.add(ca1);
-        list.add(ca2);
-        list.add(ca3);
-        list.add(ca3);
-        list.add(ca3);
-        list.add(ca3);
-        list.add(ca3);
-        list.add(ca3);
-        list.add(ca3);
-        list.add(ca3);
-        list.add(ca3);
-        list.add(ca3);
-        list.add(ca3);
-        list.add(ca3);
-        list.add(ca3);
-        list.add(ca3);
-
-
-        yearHolderPage = new YearHolderPage(list, studentClicked, rePackWindow);
-    }
-
-    private void addExampleTextFields() {
-        final JTextField textArea = new JTextField("hihi", 20);
-        textArea.setBorder(new LineBorder(Color.BLACK));
-        JTextField textArea2 = new JTextField(20);
-        JPanel panel = new JPanel();
-        panel.add(textArea);
-        panel.add(textArea2);
-        this.setContentPane(panel);
-
-        final JTextField p = (JTextField) panel.getComponent(0);
-        System.out.println(p.getText());
-    }
-
     private void setNewPage(main.Interfaces.Panel panel) {
         Panel currentPanel = panelHistoryStore.getCurrentPanel();
         if (currentPanel != null) {
             currentPanel.clearMenuBar(mainFrame.getJMenuBar());
         }
         panelHistoryStore.addPanel(panel);
+        panel.setupMenuBar(mainFrame.getJMenuBar());
         setContentPane(panel.getPageHolder());
         rePackWindow.rePackWindow();
     }
@@ -402,6 +316,16 @@ public class MainFrame extends JFrame {
     private void addDataHolderPage(JMenuBar jMenuBar) {
         JMenu menu = new JMenu("Show"); // #################################### kom på något bättre
 
+        JMenuItem frontPageItem = new JMenuItem();
+        frontPageItem.setAction(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setNewPage(frontPage);
+            }
+        });
+        frontPageItem.setText("Front-Page");
+        menu.add(frontPageItem);
+
         JMenuItem showYearHolderPage = new JMenuItem();
         showYearHolderPage.setAction(new AbstractAction() {
             @Override
@@ -409,7 +333,7 @@ public class MainFrame extends JFrame {
                 setNewPage(yearHolderPage);
             }
         });
-        showYearHolderPage.setText("YearClasses");
+        showYearHolderPage.setText("Groups");
         menu.add(showYearHolderPage);
 
         JMenuItem showCoursePage = new JMenuItem();
@@ -419,8 +343,19 @@ public class MainFrame extends JFrame {
                 setNewPage(coursesPage);
             }
         });
-        showCoursePage.setText("CoursePage");
+        showCoursePage.setText("Course-Page");
         menu.add(showCoursePage);
+
+        JMenuItem showAllStudents = new JMenuItem();
+        showAllStudents.setAction(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setNewPage(new ShowAllStudents(mainFrame.getJMenuBar(),personLexicon,rePackWindow,courseInfoTransfer,
+                                                switchToStudentCourseGrade, settingsLoader));
+            }
+        });
+        showAllStudents.setText("Show Students");
+        menu.add(showAllStudents);
 
         jMenuBar.add(menu);
     }
@@ -432,21 +367,21 @@ public class MainFrame extends JFrame {
         createCourse.setAction(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setNewPage(new CreateCourse(rePackWindow, mainFrame.getJMenuBar(),switchToAddStudentTeacherToCourse));
+                setNewPage(new CreateCourse(rePackWindow,switchToAddStudentTeacherToCourse));
             }
         });
-        createCourse.setText("CreateCourse");
+        createCourse.setText("Create Course");
         menu.add(createCourse);
 
         JMenuItem createYearClass = new JMenuItem();
         createYearClass.setAction(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                CreateYearClass createYearClass = new CreateYearClass(personLexicon, rePackWindow, mainFrame.getJMenuBar(), addToYearHolderPage);
+                CreateYearClass createYearClass = new CreateYearClass(personLexicon, addToYearHolderPage, groupSwitch);
                 setNewPage(createYearClass);
             }
         });
-        createYearClass.setText("CreateYearClass");
+        createYearClass.setText("Create Group");
         menu.add(createYearClass);
 
         JMenuItem studentCreation = new JMenuItem();
@@ -457,7 +392,7 @@ public class MainFrame extends JFrame {
                 setNewPage(sc);
             }
         });
-        studentCreation.setText("Create New Student");
+        studentCreation.setText("Create New Person");
         menu.add(studentCreation);
 
         jMenuBar.add(menu);

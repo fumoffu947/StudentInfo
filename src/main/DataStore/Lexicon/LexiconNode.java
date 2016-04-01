@@ -4,6 +4,7 @@ import main.DataStore.StudentGrade;
 import main.Interfaces.Person;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by philip on 2016-01-13.
@@ -12,7 +13,6 @@ public class LexiconNode {
 
     private HashMap<Character, LexiconNode> children = new HashMap<>();
     private  HashMap<String, Collection<Person>> namesMap = new HashMap<>();
-    //HashMap<personID, HashMap<CourseName, studentGrade>>
     private HashMap<Integer, HashMap<String,StudentGrade>> grades = new HashMap<>();
 
     public LexiconNode() {
@@ -74,6 +74,15 @@ public class LexiconNode {
 
     public  StudentGrade getGradeByPersonCourse(Person person, String courseName) {
         return grades.get(person.getID()).get(courseName);
+    }
+
+    public List<String> getCourseNamesByID(int ID) {
+        List<String> names = new ArrayList<>();
+        HashMap<String, StudentGrade> studentGradesMap = grades.get(ID);
+        if (studentGradesMap != null) {
+            names.addAll(studentGradesMap.keySet().stream().collect(Collectors.toList()));
+        }
+        return names;
     }
 
     public HashMap<Character, LexiconNode> getChildren() {

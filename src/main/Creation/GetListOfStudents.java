@@ -1,12 +1,10 @@
 package main.Creation;
 
 import main.Creation.CourseCreation.MyTableModel;
-import main.DataStore.ClassInfo;
 import main.DataStore.Lexicon.PersonLexicon;
 import main.DataStore.Student;
-import main.DataStore.StudentCourseGrade;
+import main.DataStore.ShowPages.StudentCourseGrade;
 import main.Interfaces.*;
-import main.Interfaces.InterfaceDataTransfer.AddToYearHolderPage;
 import main.Interfaces.InterfaceDataTransfer.SwitchToGivenPanel;
 
 import javax.swing.*;

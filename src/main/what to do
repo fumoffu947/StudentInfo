@@ -10,11 +10,10 @@ fixa så inte crete class försvinner om den inte skapas// Done
 fixa så det står om jag sapat en person eller inte // Done
 // fixa en initClass som skapar alla object från en .txt fil // Done
 fixa en class för att spara all information när mans tänger och när man göra stora ändringar // Done
-en person sida som man kan kolla vad som denna person går i för curser //
+en person sida som man kan kolla vad som denna person går i för curser // Done
 fixa så att när man tar bort en class så tar inte fönstret och blir större än innan //
 fixa så att man kan söka efter bara studenter och bara lärare // Done
-lägg till när man tar bort en class att man måste verifiera det // (optional, releas in ver 1.1)
-
+lägg till när man tar bort en class att man måste verifiera det // Done
 
 
 fixa så att man behöver bara skriva ett mål // Done
@@ -23,7 +22,13 @@ fixa så att det står att man ska skriva i ett namn på kursen // Done
 fixa så att man får ett felmedelande (i courseCreation) om vad som är fel för att man ska komma vidare // Done (tillräkligt bra , kan fixa så den är mer specifik)
 fixa så att Id nummret sparas och skrivs ut så att man håller reda på vilka som faktist har använts (spara de som inte används som finn emellan de som existerar och det nummer som nästa id ska börja på)// done
 
-fixa så att man kan ta bort personer från lexicon //
-lägg till en lista i en course om man tar bort en person från en grup så man ej behöver ta bort dem från gruppen utan bar kan skita i att ha med personen //
-fixa så att man bara kan skriva siffror på max poängen i courseCreation //
-fixa så man får ett medelande om man får en för hög poäng på studentCourseGradePagen och fråga om man ska behålla det eller inte (3 alternativ ja,nej,avrunda) //
+lägg till en lista i en course om man tar bort en person från en grup så man ej behöver ta bort dem från gruppen utan bar kan skita i att ha med personen // Done
+Fixa en funtion i personLexicon som tar bort alla saker som har med en kurs att göra (så inte strö minne finns med inte används) // Done (när en kurs tas bort
+fixa en funktion i PersonLexixcon som tar bort en person och alla grades m.m // done (tror den funkar)
+fixa så att man bara kan skriva siffror på max poängen i courseCreation // Done
+fixa så man får ett medelande om man skriver en för hög poäng på studentCourseGradePagen och fråga om man ska behålla det eller inte (3 alternativ ja,nej,avrunda) // Done
+
+fixa så man ej kan ändra på något i coursepage // Done
+fixa så att inte 2 knappar av "Add to Course" finns i add studentsTeachersTo Course //
+
+fixa färgerna så att de funkar i StudentCourseGrade (troligen egen gjort renderer och editor) // (kan skickas ändå den är ju faktist klar)

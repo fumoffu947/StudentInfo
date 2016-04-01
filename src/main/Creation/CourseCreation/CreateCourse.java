@@ -1,11 +1,11 @@
 package main.Creation.CourseCreation;
 
 import main.DataStore.CourseGoalModel;
+import main.DataStore.CourseGradeModel;
 import main.Interfaces.*;
 import main.Interfaces.PaneInterfaceSwitches.SwitchToAddStudentTeacherToCourse;
 
 import javax.swing.*;
-import javax.swing.event.CellEditorListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
@@ -15,6 +15,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * An example to get me going
@@ -51,16 +52,24 @@ public class CreateCourse implements main.Interfaces.Panel {
 	private final SwitchToAddStudentTeacherToCourse switchPanel;
 	private JTextField courseNameWriteField = new JTextField();
 	private JPanel pageHolder = new JPanel();
+
 	private DefaultTableModel tableModel = new DefaultTableModel();
 	private courseJTable table = new courseJTable(tableModel);
+
+	private  DefaultTableModel gradeLevelTableModel = new DefaultTableModel();
+	private JTable gradeLevelTable = new JTable(gradeLevelTableModel);
+
 	private JScrollPane jScrollPane = new JScrollPane(table);
 
-	private JButton addActivityButton = new JButton();
-	private JButton addGoalButton = new JButton();
+	private JButton addMilestoneButton = new JButton();
+	private JButton addObjectiveButton = new JButton();
 	private JButton continueToNextStep = new JButton();
 
+	private int nextObjectiveNumber = 2;
 
-	public CreateCourse(RePackWindow rePackWindow, JMenuBar jMenuBar, SwitchToAddStudentTeacherToCourse switchPanel) {
+	private Pattern numberPattern = Pattern.compile("[0-9]+");
+
+	public CreateCourse(RePackWindow rePackWindow, SwitchToAddStudentTeacherToCourse switchPanel) {
 		this.rePackWindow = rePackWindow;
 		this.switchPanel = switchPanel;
 		tableModel.addColumn("Objective Column");
@@ -73,7 +82,14 @@ public class CreateCourse implements main.Interfaces.Panel {
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-		// setup modelLitener so that when user changes value at milestone n all milestone n are changed
+		gradeLevelTableModel.addColumn("Objective Column");
+		gradeLevelTableModel.addColumn("Grade: E");
+		gradeLevelTableModel.addColumn("Grade: C");
+		gradeLevelTableModel.addColumn("Grade: A");
+		gradeLevelTableModel.addRow(new Object[] {});
+		gradeLevelTableModel.addRow(new Object[] {"Objective 1","0","0","0"});
+
+		// setup modelListener so that when user changes value at milestone n all milestone n are changed
 		TableModelListener tableModelListener = new TableModelListener()
 		{
 			@Override public void tableChanged(final TableModelEvent e) {
@@ -83,21 +99,43 @@ public class CreateCourse implements main.Interfaces.Panel {
 				if (table.getSelectedRow() == 0) {
 					String valueToCopy = (String) table.getValueAt(table.getSelectedRow(),table.getSelectedColumn());
 					if (valueToCopy != null) {
-						int mileOfset = ((table.getSelectedColumn() - 1) % 3);
-						int tableModelStart = ((table.getColumnCount()-1)/3)*mileOfset+1;
+						int objectiveNum = (table.getColumnCount()-1)/3;
+						int mileOffset = ((table.getSelectedColumn() - 1) % objectiveNum);
 						for (int gradeIndex = 0; gradeIndex < 3; gradeIndex++) {
-							tableModel.setValueAt(valueToCopy,0,tableModelStart+gradeIndex);
+							table.setValueAt(valueToCopy,0,mileOffset+(objectiveNum*gradeIndex)+1);
 						}
 					}
 
+				}
+				if (table.getSelectedColumn() > 0 && table.getSelectedRow() > 0) {
+					if (!numberPattern.matcher((String) table.getValueAt(table.getSelectedRow(),table.getSelectedColumn())).matches()) {
+						String newLine = System.getProperty("line.separator");
+						JOptionPane.showMessageDialog(null,"You can only write numbers inside of the table"+newLine+"thus outside of the objective column and milestone row");
+						tableModel.setValueAt("",table.getSelectedRow(), table.getSelectedColumn());
+					}
 				}
 				tableModel.addTableModelListener(this);
 			}
 		};
 		table.getModel().addTableModelListener(tableModelListener);
 
-
-		setUpButtons(rePackWindow, jMenuBar);
+		TableModelListener gradeModelListener = new TableModelListener() {
+			@Override
+			public void tableChanged(TableModelEvent e) {
+				gradeLevelTableModel.removeTableModelListener(this);
+				int selectedRow = gradeLevelTable.getSelectedRow();
+				int selectedColumn = gradeLevelTable.getSelectedColumn();
+				if (selectedRow != -1 && selectedColumn != -1) {
+					String newValue = (String) gradeLevelTable.getValueAt(selectedRow, selectedColumn);
+					if (!numberPattern.matcher(newValue).matches()) {
+						JOptionPane.showMessageDialog(null, "You can only write numbers in the this table.", "Not A Number", JOptionPane.ERROR_MESSAGE);
+						gradeLevelTableModel.setValueAt(0, selectedRow, selectedColumn);
+					}
+				}
+				gradeLevelTableModel.addTableModelListener(this);
+			}
+		};
+		gradeLevelTableModel.addTableModelListener(gradeModelListener);
 
 		setUpLayoutAndPanels();
 
@@ -114,8 +152,9 @@ public class CreateCourse implements main.Interfaces.Panel {
 
 		GridBagConstraints courseObjectiveTableConstraints = new GridBagConstraints();
 		courseObjectiveTableConstraints.fill = GridBagConstraints.BOTH;
+		courseObjectiveTableConstraints.gridx = 0;
 		courseObjectiveTableConstraints.gridy = 1;
-		courseObjectiveTableConstraints.weightx = 1.0;
+		courseObjectiveTableConstraints.weightx = 4.0;
 		courseObjectiveTableConstraints.weighty = 1.0;
 		courseObjectiveTableConstraints.insets = new Insets(0,0,0,0);
 
@@ -127,6 +166,14 @@ public class CreateCourse implements main.Interfaces.Panel {
 		courseNameContainerConstraints.fill = GridBagConstraints.HORIZONTAL;
 		courseNameContainerConstraints.insets = new Insets(0,0,0,0);
 		courseNameContainerConstraints.weightx = 1.0;
+		courseNameContainerConstraints.gridwidth = 2;
+
+		GridBagConstraints gradeLevelTableConstraints = new GridBagConstraints();
+		gradeLevelTableConstraints.gridx = 1;
+		gradeLevelTableConstraints.gridy = 1;
+		gradeLevelTableConstraints.weightx = 0.5;
+		gradeLevelTableConstraints.weighty = 1.0;
+		gradeLevelTableConstraints.fill = GridBagConstraints.BOTH;
 
 		JPanel courseNameContainer = new JPanel(new GridBagLayout());
 		JTextField courseNameTip = new JTextField();
@@ -138,10 +185,11 @@ public class CreateCourse implements main.Interfaces.Panel {
 		pageHolder.setLayout(gridBagLayout);
 		pageHolder.add(courseNameContainer,courseNameContainerConstraints);
 		pageHolder.add(jScrollPane,courseObjectiveTableConstraints);
+		pageHolder.add(new JScrollPane(gradeLevelTable), gradeLevelTableConstraints);
 	}
 
 	private void setUpButtons(final RePackWindow rePackWindow, JMenuBar jMenuBar) {
-		addActivityButton.setAction(new AbstractAction()
+		addMilestoneButton.setAction(new AbstractAction()
 		{
 			@Override public void actionPerformed(final ActionEvent e) {
 				if (table.isEditing()) {
@@ -165,19 +213,21 @@ public class CreateCourse implements main.Interfaces.Panel {
 
 			}
 		});
-		addActivityButton.setText("Add Milestone");
-		jMenuBar.add(addActivityButton);
+		addMilestoneButton.setText("Add Milestone");
+		jMenuBar.add(addMilestoneButton);
 
 
-		addGoalButton.setAction(new AbstractAction() {
+		addObjectiveButton.setAction(new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				tableModel.addRow(new Object[] {});
+				gradeLevelTableModel.addRow(new Object[] {"Objective "+nextObjectiveNumber,"0","0","0"});
+				nextObjectiveNumber++;
 				rePackWindow.rePackWindow();
 			}
 		});
-		addGoalButton.setText("Add Objective");
-		jMenuBar.add(addGoalButton);
+		addObjectiveButton.setText("Add Objective");
+		jMenuBar.add(addObjectiveButton);
 
 		continueToNextStep.setAction(new AbstractAction() {
 			@Override
@@ -191,6 +241,7 @@ public class CreateCourse implements main.Interfaces.Panel {
 				ArrayList<String> objectives = new ArrayList<>();
 				ArrayList<String> milestone = new ArrayList<>();
 				List<List<Integer>> maxPointModel = new ArrayList<>();
+				List<List<Integer>> gradeLevelModel = new ArrayList<>();
 
 				if (table.getColumnCount() > 1 && table.getRowCount() > 1) {
 
@@ -207,11 +258,13 @@ public class CreateCourse implements main.Interfaces.Panel {
 						}
 					}
 
-					// add al the objectives
+					// add all the objectives
+					ArrayList<Integer> objectivePositions = new ArrayList<Integer>();
 					for (int row = 1; row < table.getRowCount(); row++) {
 						String arg = (String) table.getValueAt(row, 0);
 						if (arg != null && !arg.isEmpty()) {
 							objectives.add(arg);
+							objectivePositions.add(row);
 						}
 					}
 
@@ -224,18 +277,29 @@ public class CreateCourse implements main.Interfaces.Panel {
 								maxPointModel.get(row-1).add(Integer.parseInt(arg));
 							}
 							else {
-								maxPointModel.get(row).add(0);
+								maxPointModel.get(row-1).add(0);
 							}
 						}
 
 					}
 
-
+					// add the gradeLevel values for each objective
+					for (int row = 0; row < objectivePositions.size(); row++) {
+						gradeLevelModel.add(new ArrayList<>());
+						for (int col = 1; col < 4; col++) {
+							String arg = (String) gradeLevelTable.getValueAt(objectivePositions.get(row), col);
+							if (arg != null && !arg.isEmpty()) {
+								gradeLevelModel.get(row).add(Integer.parseInt(arg));
+							}else {
+								gradeLevelModel.get(row).add(0);
+							}
+						}
+					}
 				}
 				if (!milestone.isEmpty() && !objectives.isEmpty() && !name.isEmpty()) {
 					clearMenuBar(jMenuBar);
 					rePackWindow.rePackWindow();
-					switchPanel.startChooseGroupPage(name, new CourseGoalModel(objectives, milestone, maxPointModel));
+					switchPanel.startChooseGroupPage(name, new CourseGoalModel(objectives, milestone, maxPointModel), new CourseGradeModel(gradeLevelModel));
 				}
 				else {
 					String newLine = System.getProperty("line.separator");
@@ -251,8 +315,8 @@ public class CreateCourse implements main.Interfaces.Panel {
 
 	@Override
 	public void clearMenuBar(JMenuBar jMenuBar) {
-		jMenuBar.remove(addActivityButton);
-		jMenuBar.remove(addGoalButton);
+		jMenuBar.remove(addMilestoneButton);
+		jMenuBar.remove(addObjectiveButton);
 		jMenuBar.remove(continueToNextStep);
 	}
 

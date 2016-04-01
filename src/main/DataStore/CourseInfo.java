@@ -14,21 +14,40 @@ import java.util.List;
  */
 public class CourseInfo {
 
+    private String courseName;
+
     private List<ClassInfo> classInfoList;
     private List<Student> otherEnlistedStudents;
-    private String courseName;
     private List<Teacher> teachers;
+
     private CourseGoalModel courseGoalModel;
-    private List<Student> listOfRemovedGroupStudents = new ArrayList<>();
+    private CourseGradeModel courseGradeModel;
+
+    private List<Integer> listOfRemovedGroupStudents;
 
     public CourseInfo(final List<ClassInfo> classInfoList, final List<Student> otherEnlistedStudents, final String courseName,
-                      final List<Teacher> teachers, CourseGoalModel courseGoalModel) {
+                      final List<Teacher> teachers, CourseGoalModel courseGoalModel, CourseGradeModel courseGradeModel) {
 
         this.classInfoList = classInfoList;
         this.otherEnlistedStudents = otherEnlistedStudents;
         this.courseName = courseName;
         this.teachers = teachers;
         this.courseGoalModel = courseGoalModel;
+        this.listOfRemovedGroupStudents = new ArrayList<>();
+        this.courseGradeModel = courseGradeModel;
+    }
+
+    public CourseInfo(final List<ClassInfo> classInfoList, final List<Student> otherEnlistedStudents, final String courseName,
+                      final List<Teacher> teachers, CourseGoalModel courseGoalModel, List<Integer> listOfRemovedGroupStudents,
+                      CourseGradeModel courseGradeModel) {
+
+        this.classInfoList = classInfoList;
+        this.otherEnlistedStudents = otherEnlistedStudents;
+        this.courseName = courseName;
+        this.teachers = teachers;
+        this.courseGoalModel = courseGoalModel;
+        this.listOfRemovedGroupStudents = listOfRemovedGroupStudents;
+        this.courseGradeModel = courseGradeModel;
     }
 
     public List<ClassInfo> getClassInfoList() {
@@ -67,8 +86,8 @@ public class CourseInfo {
         return this.teachers.add(teacher);
     }
 
-    public boolean removeStudent(Student student) {
-        return listOfRemovedGroupStudents.add(student);
+    public boolean removeStudent(int studentID) {
+        return listOfRemovedGroupStudents.add(studentID);
     }
 
     public boolean removeOtherEnlistedStudent(Student student) {
@@ -77,5 +96,13 @@ public class CourseInfo {
 
     public CourseGoalModel getCourseGoalModel() {
         return courseGoalModel;
+    }
+
+    public List<Integer> getListOfRemovedGroupStudents() {
+        return listOfRemovedGroupStudents;
+    }
+
+    public CourseGradeModel getCourseGradeModel() {
+        return courseGradeModel;
     }
 }

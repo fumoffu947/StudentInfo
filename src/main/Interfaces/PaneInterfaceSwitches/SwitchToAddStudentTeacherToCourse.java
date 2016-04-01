@@ -2,6 +2,7 @@ package main.Interfaces.PaneInterfaceSwitches;
 
 import main.DataStore.ClassInfo;
 import main.DataStore.CourseGoalModel;
+import main.DataStore.CourseGradeModel;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ import java.util.List;
  */
 public interface SwitchToAddStudentTeacherToCourse {
 
-    void startAddStudentTeacherToCourse(String courseName, CourseGoalModel  courseGoalModel, List<ClassInfo> classInfo);
+    void startAddStudentTeacherToCourse(String courseName, CourseGoalModel  courseGoalModel, CourseGradeModel courseGradeModel, List<ClassInfo> classInfo);
 
-    void startChooseGroupPage(String courseName, CourseGoalModel  courseGoalModel);
+    void startChooseGroupPage(String courseName, CourseGoalModel  courseGoalModel, CourseGradeModel courseGradeModel);
 }

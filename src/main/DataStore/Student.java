@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class Student implements Person {
 
-    private JPanel jPanel;
+    private JPanel pageHolder;
     private int firstName;
     private List<String> name;
     private String lastName;
@@ -39,7 +39,7 @@ public class Student implements Person {
     private void createJPanel(final List<String> name, final String lastName, final String cellPhoneNumber,
 			      final String emailAddress)
     {
-	jPanel = new JPanel();
+	pageHolder = new JPanel();
 	JTextField nameField = new JTextField();
 	JTextField lastNameField = new JTextField(lastName);
 	JTextField cellNumber = new JTextField(cellPhoneNumber);
@@ -54,10 +54,10 @@ public class Student implements Person {
 	lastNameField.setEditable(false);
 	cellNumber.setEditable(false);
 	email.setEditable(false);
-	jPanel.add(nameField);
-	jPanel.add(lastNameField);
-	jPanel.add(cellNumber);
-	jPanel.add(email);
+	pageHolder.add(nameField);
+	pageHolder.add(lastNameField);
+	pageHolder.add(cellNumber);
+	pageHolder.add(email);
     }
 
     public String getFirstName() {
@@ -91,13 +91,13 @@ public class Student implements Person {
 	for (String s : name) {
 	    sb.append(" ").append(s);
 	}
-	JTextField t = (JTextField) jPanel.getComponent(0);
+	JTextField t = (JTextField) pageHolder.getComponent(0);
 	t.setText(sb.toString());
     }
 
     public void setLastName(final String lastName) {
 	this.lastName = lastName;
-	JTextField t = (JTextField) jPanel.getComponent(1);
+	JTextField t = (JTextField) pageHolder.getComponent(1);
 	t.setText(lastName);
     }
 
@@ -107,18 +107,18 @@ public class Student implements Person {
 
     public void setCellPhoneNumber(final String cellPhoneNumber) {
         this.cellPhoneNumber = cellPhoneNumber;
-	JTextField t = (JTextField) jPanel.getComponent(2);
+	JTextField t = (JTextField) pageHolder.getComponent(2);
 	t.setText(cellPhoneNumber);
     }
 
     public void setEmailAddress(final String emailAddress) {
         this.emailAddress = emailAddress;
-	JTextField t = (JTextField) jPanel.getComponent(3);
+	JTextField t = (JTextField) pageHolder.getComponent(3);
 	t.setText(lastName);
     }
 
-    public JPanel getJPanel() {
-	return jPanel;
+    public JPanel getPageHolder() {
+	return pageHolder;
     }
 
 	@Override
