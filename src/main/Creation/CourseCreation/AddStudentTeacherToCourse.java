@@ -61,7 +61,6 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
         this.classIfs = classIfs;
         this.courseName = courseName;
         this.switchToStudentCourseGrade = switchToStudentCourseGrade;
-        setupMenuButtons(jMenuBar, rePackWindow);
 
         GridBagLayout studentGridBagLayout = new GridBagLayout();
         GridBagConstraints studentContainerConstraints = new GridBagConstraints();

@@ -24,6 +24,10 @@ import java.awt.event.WindowEvent;
 import java.io.*;
 import java.util.*;
 import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  * Created by fumoffu on 2015-10-20.
@@ -31,6 +35,9 @@ import java.util.List;
 public class MainFrame extends JFrame {
 
     // interfaces needed to work
+    public static Logger logger;
+
+
     private final AddToYearHolderPage addToYearHolderPage;
     private final StudentClicked studentClicked;
     private final SwitchToAddStudentTeacherToCourse switchToAddStudentTeacherToCourse;
@@ -63,11 +70,31 @@ public class MainFrame extends JFrame {
     private JFrame mainFrame = this;
 
     public static void main(String[] args) {
-        new MainFrame();
-    }
+        try {
+            File errorLog = new File("content/ErrorLog.txt");
+            if (!errorLog.exists()) {
+                errorLog.createNewFile();
+                System.out.println("ErrorLog.txt created");
+            }
+            FileOutputStream errorOutStream = new FileOutputStream(errorLog);
+            PrintStream errorPrintStream = new PrintStream(errorOutStream);
+            System.setErr(errorPrintStream);
 
-    public RePackWindow getRePackWindow() {
-        return rePackWindow;
+            File loggerFile = new File("content/LoggerFile.txt");
+            if (!loggerFile.exists()) {
+                loggerFile.createNewFile();
+            }
+
+            java.util.logging.Handler handler = new FileHandler("content/LoggerFile.txt");
+            handler.setFormatter(new SimpleFormatter());
+            logger = Logger.getGlobal();
+            logger.addHandler(handler);
+
+            logger.log(Level.INFO, "Starting the mainframe, starting upp the system.");
+            new MainFrame();
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public PersonLexicon getPersonLexicon() {
@@ -167,9 +194,13 @@ public class MainFrame extends JFrame {
         setLayout(new BorderLayout());
 
         addMenu();
+        logger.log(Level.INFO,"Added all menu items successfully.");
 
+        logger.log(Level.INFO, "Starting to load data from files.");
         startLoad();
+        logger.log(Level.INFO, "Done loading data from files.");
 
+        logger.log(Level.INFO, "Setting first Panel (FrontPage).");
         setNewPage(frontPage);
 
         this.pack();
