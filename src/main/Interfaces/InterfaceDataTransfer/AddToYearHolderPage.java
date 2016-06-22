@@ -7,5 +7,5 @@ import main.DataStore.ClassInfo;
  */
 public interface AddToYearHolderPage {
 
-    void addClass(ClassInfo classInfo);
+    boolean addClass(ClassInfo classInfo);
 }

@@ -1,5 +1,6 @@
 package main.DataStore;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,5 +29,18 @@ public class CourseGradeModel {
 
     public List<List<Integer>> getGradeLevels() {
         return gradeLevels;
+    }
+
+    public CourseGradeModel getClone() {
+        List<List<Integer>> gradeLevelsNew = new ArrayList<>();
+
+        for (int row = 0; row < gradeLevels.size(); row++) {
+            gradeLevelsNew.add(new ArrayList<>());
+            for (int col = 0; col < gradeLevels.get(row).size(); col++) {
+                gradeLevelsNew.get(row).add(gradeLevels.get(row).get(col));
+            }
+        }
+
+        return new CourseGradeModel(gradeLevelsNew);
     }
 }

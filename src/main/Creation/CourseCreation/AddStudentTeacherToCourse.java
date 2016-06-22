@@ -4,6 +4,7 @@ import main.DataStore.*;
 import main.DataStore.Lexicon.PersonLexicon;
 import main.Interfaces.*;
 import main.Interfaces.PaneInterfaceSwitches.SwitchToStudentCourseGrade;
+import main.MainFrame;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -11,15 +12,21 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by philip on 2016-01-13.
  *
  */
 public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
+
+    private Logger logger = MainFrame.logger;
 
     private final List<ClassInfo> classIfs;
     private final String courseName;
@@ -50,7 +57,7 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
     private JTable teacherInCourseTable = new JTable(teacherInCourseTableModel);
     private JTable teacherSearchResultTable = new JTable(teacherSearchResultTableModel);
 
-    public AddStudentTeacherToCourse(PersonLexicon personLexicon, JMenuBar jMenuBar, RePackWindow rePackWindow,
+    public AddStudentTeacherToCourse(PersonLexicon personLexicon, RePackWindow rePackWindow,
                                      String courseName, CourseGoalModel courseGoalModel, CourseGradeModel courseGradeModel,
                                      List<ClassInfo> classIfs, SwitchToStudentCourseGrade switchToStudentCourseGrade) {
 
@@ -117,7 +124,7 @@ public class AddStudentTeacherToCourse implements main.Interfaces.Panel {
                     insertNewGradeForStudentToCourse(classIfs.get(i).getStudents());
                 }
                 insertNewGradeForStudentToCourse(students);
-
+                logger.log(Level.INFO, "Created a new course named: "+courseName);
                 switchToStudentCourseGrade.switchToCourseGradePageAndAddCourseInfo(new CourseInfo(classIfs,students,courseName,teachers,courseGoalModel,courseGradeModel));
                 rePackWindow.rePackWindow();
             }

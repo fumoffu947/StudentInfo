@@ -6,9 +6,13 @@ import main.DataStore.StudentGrade;
 import main.DataStore.Teacher;
 import main.Interfaces.Person;
 import main.Interfaces.PersonSearchFunction;
+import main.MainFrame;
+import sun.rmi.runtime.Log;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -16,6 +20,8 @@ import java.util.stream.Collectors;
  * lexicon to store all the persons in the program (should switch to a DataBase)
  */
 public class PersonLexicon {
+
+    private Logger logger = MainFrame.logger;
 
     private LexiconNode startNode = new LexiconNode();
 
@@ -372,6 +378,7 @@ public class PersonLexicon {
                 }
                 currentNode.getGrades().remove(person.getID());
                 settingsLoader.addScatterdIdNumber(person.getID());
+                logger.log(Level.INFO,"Removed person: "+person+" from the lexicon.");
                 return true;
             }
         }
@@ -425,7 +432,14 @@ public class PersonLexicon {
         return new ArrayList<>();
     }
 
-    public void removeCourseFromPresons(List<Student> persons, String courseName) {
+    /**
+     * removes the given course from the given list of students
+     * @param persons
+     * the person to remove the course from
+     * @param courseName
+     * the course to remove
+     */
+    public void removeCourseFromPersons(List<Student> persons, String courseName) {
         int personPos = 0;
         while(personPos < persons.size()) {
             Person p = persons.get(personPos);
@@ -440,5 +454,6 @@ public class PersonLexicon {
             }
             personPos++;
         }
+        logger.log(Level.INFO,"Removed course: "+courseName+" from these students: "+personPos);
     }
 }

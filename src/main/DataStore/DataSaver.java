@@ -3,28 +3,36 @@ package main.DataStore;
 import main.DataStore.Lexicon.PersonLexicon;
 import main.DataStore.ShowPages.CoursesPage;
 import main.DataStore.ShowPages.YearHolderPage;
+import main.MainFrame;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  * Created by phili on 2016-02-14.
  */
 public class DataSaver implements Runnable {
 
+    private Logger logger;
+
     private final PersonLexicon personLexicon;
     private final YearHolderPage yearHolderPage;
     private final CoursesPage coursesPage;
     private final SettingsLoader settingsLoader;
 
-    public DataSaver(PersonLexicon personLexicon, YearHolderPage yearHolderPage, CoursesPage coursesPage, SettingsLoader settingsLoader) {
+    public DataSaver(PersonLexicon personLexicon, YearHolderPage yearHolderPage, CoursesPage coursesPage, SettingsLoader settingsLoader,Logger logger) {
         this.personLexicon = personLexicon;
         this.yearHolderPage = yearHolderPage;
         this.coursesPage = coursesPage;
         this.settingsLoader = settingsLoader;
+        this.logger = logger;
     }
 
     @Override
@@ -34,6 +42,7 @@ public class DataSaver implements Runnable {
         try {
             // saving the persons and grade for the students
             BufferedOutputStream fileWriter = new BufferedOutputStream(new FileOutputStream("content/Students.txt"));
+            logger.log(Level.CONFIG,"Started saving lexicon.");
             personLexicon.saveLexicon(fileWriter);
             fileWriter.flush();
             fileWriter.close();
@@ -44,6 +53,7 @@ public class DataSaver implements Runnable {
         try {
             // save the groups of people
             BufferedOutputStream fileWriter = new BufferedOutputStream(new FileOutputStream("content/Groups.txt"));
+            logger.log(Level.CONFIG, "Started saving groups.");
 
             // save each group of people
             List<ClassInfo> groups = yearHolderPage.getClasses();
@@ -72,6 +82,7 @@ public class DataSaver implements Runnable {
             fileWriter.write("[".getBytes());
             fileWriter.flush();
             fileWriter.close();
+            logger.log(Level.CONFIG,"Done saving groups.");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -79,6 +90,7 @@ public class DataSaver implements Runnable {
         try {
             // saves the courses
             BufferedOutputStream fileWriter = new BufferedOutputStream(new FileOutputStream("content/Courses.txt"));
+            logger.log(Level.CONFIG, "Started saving courses.");
             // save courses
             List<CourseInfo> courses = coursesPage.getCourses();
             for (int courseIndex = 0; courseIndex < courses.size(); courseIndex++) {
@@ -147,10 +159,10 @@ public class DataSaver implements Runnable {
 
                 stringBuilder.append(":");
                 // write the maxPoints for each milestone
-                for (int maxRow = 0; maxRow < courseGoalModel.getMaxPoits().size(); maxRow++) {
-                    for (int maxCol = 0; maxCol < courseGoalModel.getMaxPoits().get(0).size(); maxCol++) {
-                        stringBuilder.append(courseGoalModel.getMaxPoits().get(maxRow).get(maxCol));
-                        if (maxRow == courseGoalModel.getMaxPoits().size()-1 && maxCol == courseGoalModel.getMaxPoits().get(0).size()-1) {
+                for (int maxRow = 0; maxRow < courseGoalModel.getMaxPoints().size(); maxRow++) {
+                    for (int maxCol = 0; maxCol < courseGoalModel.getMaxPoints().get(0).size(); maxCol++) {
+                        stringBuilder.append(courseGoalModel.getMaxPoints().get(maxRow).get(maxCol));
+                        if (maxRow == courseGoalModel.getMaxPoints().size()-1 && maxCol == courseGoalModel.getMaxPoints().get(0).size()-1) {
                             continue;
                         }else {
                             stringBuilder.append(",");
@@ -194,12 +206,14 @@ public class DataSaver implements Runnable {
 
             fileWriter.flush();
             fileWriter.close();
+            logger.log(Level.CONFIG, "Done saving courses.");
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try {
             BufferedOutputStream fileWriter = new BufferedOutputStream(new FileOutputStream("content/Settings.txt"));
+            logger.log(Level.CONFIG, "Started saving settings.");
             StringBuilder stringBuilder = new StringBuilder();
 
             // appending the last id Used
@@ -219,6 +233,7 @@ public class DataSaver implements Runnable {
 
             fileWriter.flush();
             fileWriter.close();
+            logger.log(Level.CONFIG, "Done saving settings.");
         } catch (IOException e) {
             e.printStackTrace();
         }

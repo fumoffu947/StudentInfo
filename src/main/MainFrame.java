@@ -3,6 +3,7 @@ package main;
 import main.Creation.CourseCreation.AddStudentTeacherToCourse;
 import main.Creation.CourseCreation.ChooseGroupPage;
 import main.Creation.CourseCreation.CreateCourse;
+import main.Creation.CourseCreation.CreateFromCourse;
 import main.Creation.CreateYearClass;
 import main.Creation.GetListOfStudents;
 import main.Creation.PersonCreation;
@@ -13,6 +14,7 @@ import main.Interfaces.*;
 import main.Interfaces.InterfaceDataTransfer.*;
 import main.Interfaces.PaneInterfaceSwitches.GroupSwitch;
 import main.Interfaces.PaneInterfaceSwitches.SwitchToAddStudentTeacherToCourse;
+import main.Interfaces.PaneInterfaceSwitches.SwitchToCreateFromCourse;
 import main.Interfaces.PaneInterfaceSwitches.SwitchToStudentCourseGrade;
 import main.Interfaces.Panel;
 
@@ -48,16 +50,17 @@ public class MainFrame extends JFrame {
     private StartGetListOfStudents startGetListOfStudents;
     private CourseInfoTransfer courseInfoTransfer;
     private GroupSwitch groupSwitch;
+    private SwitchToCreateFromCourse switchToCreateFromCourse;
     private SwitchToStudentCourseGrade switchToStudentCourseGrade = new SwitchToStudentCourseGrade() {
         @Override
         public void switchToCourseGradePage(CourseInfo courseInfo) {
-            setNewPage(new StudentCourseGrade(courseInfo, mainFrame.getJMenuBar(), personLexicon, rePackWindow, startGetListOfStudents));
+            setNewPage(new StudentCourseGrade(courseInfo, personLexicon, rePackWindow, startGetListOfStudents));
         }
 
         @Override
         public void switchToCourseGradePageAndAddCourseInfo(CourseInfo courseInfo) {
             coursesPage.addCourse(courseInfo);
-            setNewPage(new StudentCourseGrade(courseInfo, mainFrame.getJMenuBar(), personLexicon, rePackWindow, startGetListOfStudents));
+            setNewPage(new StudentCourseGrade(courseInfo, personLexicon, rePackWindow, startGetListOfStudents));
         }
     };
 
@@ -70,6 +73,7 @@ public class MainFrame extends JFrame {
     private JFrame mainFrame = this;
 
     public static void main(String[] args) {
+        setupContentDir();
         try {
             File errorLog = new File("content/ErrorLog.txt");
             if (!errorLog.exists()) {
@@ -86,9 +90,11 @@ public class MainFrame extends JFrame {
             }
 
             java.util.logging.Handler handler = new FileHandler("content/LoggerFile.txt");
+            handler.setLevel(Level.ALL);
             handler.setFormatter(new SimpleFormatter());
             logger = Logger.getGlobal();
             logger.addHandler(handler);
+            logger.setLevel(Level.ALL);
 
             logger.log(Level.INFO, "Starting the mainframe, starting upp the system.");
             new MainFrame();
@@ -109,7 +115,7 @@ public class MainFrame extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 super.windowClosing(e);
-                DataSaver dataSaver = new DataSaver(personLexicon,yearHolderPage,coursesPage, settingsLoader);
+                DataSaver dataSaver = new DataSaver(personLexicon,yearHolderPage,coursesPage, settingsLoader, logger);
                 dataSaver.run();
             }
         });
@@ -150,8 +156,6 @@ public class MainFrame extends JFrame {
             }
         };
 
-        setupContentDir();
-
         this.rePackWindow = () -> {
             mainFrame.setMinimumSize(mainFrame.getSize());
             mainFrame.setMaximumSize(mainFrame.getSize());
@@ -163,8 +167,8 @@ public class MainFrame extends JFrame {
 
         this.addToYearHolderPage = new AddToYearHolderPage() {
             @Override
-            public void addClass(ClassInfo classInfo) {
-                yearHolderPage.addClassToPage(classInfo);
+            public boolean addClass(ClassInfo classInfo) {
+                return yearHolderPage.addNewClassToPage(classInfo);
             }
         };
 
@@ -178,7 +182,7 @@ public class MainFrame extends JFrame {
         this.switchToAddStudentTeacherToCourse = new SwitchToAddStudentTeacherToCourse() {
             @Override
             public void startAddStudentTeacherToCourse(String courseName, CourseGoalModel courseGoalModel, CourseGradeModel courseGradeModel, List<ClassInfo> classInfo) {
-                setNewPage(new AddStudentTeacherToCourse(personLexicon,mainFrame.getJMenuBar(), rePackWindow,courseName,
+                setNewPage(new AddStudentTeacherToCourse(personLexicon, rePackWindow,courseName,
                             courseGoalModel,courseGradeModel,classInfo,switchToStudentCourseGrade));
             }
 
@@ -186,6 +190,13 @@ public class MainFrame extends JFrame {
             public void startChooseGroupPage(String courseName, CourseGoalModel courseGoalModel, CourseGradeModel courseGradeModel) {
                 setNewPage(new ChooseGroupPage(yearHolderPage.getClasses(), switchToAddStudentTeacherToCourse, courseName,
                         courseGoalModel, courseGradeModel, mainFrame.getJMenuBar()));
+            }
+        };
+
+        this.switchToCreateFromCourse = new SwitchToCreateFromCourse() {
+            @Override
+            public void switchToPage() {
+                setNewPage(new CreateFromCourse(coursesPage,switchToAddStudentTeacherToCourse));
             }
         };
 
@@ -236,7 +247,7 @@ public class MainFrame extends JFrame {
         }
     }
 
-    private void setupContentDir() {
+    private static void setupContentDir() {
         File contentDir = new File("content");
 
         if (!contentDir.exists()) {
@@ -398,7 +409,7 @@ public class MainFrame extends JFrame {
         createCourse.setAction(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setNewPage(new CreateCourse(rePackWindow,switchToAddStudentTeacherToCourse));
+                setNewPage(new CreateCourse(rePackWindow,switchToAddStudentTeacherToCourse,switchToCreateFromCourse,coursesPage));
             }
         });
         createCourse.setText("Create Course");

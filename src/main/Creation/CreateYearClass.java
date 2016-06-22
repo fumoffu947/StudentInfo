@@ -7,6 +7,7 @@ import main.DataStore.Student;
 import main.Interfaces.*;
 import main.Interfaces.InterfaceDataTransfer.AddToYearHolderPage;
 import main.Interfaces.PaneInterfaceSwitches.GroupSwitch;
+import main.MainFrame;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -17,11 +18,15 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by fumoffu on 2015-10-24.
  */
 public class CreateYearClass implements main.Interfaces.Panel {
+
+    private Logger logger = MainFrame.logger;
 
     private final AddToYearHolderPage addToYearHolderPage;
     private final GroupSwitch groupSwitch;
@@ -61,9 +66,14 @@ public class CreateYearClass implements main.Interfaces.Panel {
                 String name = className.getText();
 
                 if (name.length() > 0 && !studentGroup.isEmpty()) {
-                    addToYearHolderPage.addClass(new ClassInfo(studentGroup, name));
-                    clearMenuBar(jMenuBar);
-                    groupSwitch.switchToGroupPage();
+                    logger.log(Level.INFO, "Created a group named: "+name+" with these students: "+studentGroup.toString());
+                    if (addToYearHolderPage.addClass(new ClassInfo(studentGroup, name))) {
+                        clearMenuBar(jMenuBar);
+                        groupSwitch.switchToGroupPage();
+                    }else {
+                        logger.log(Level.INFO,"Failed to create group because there already exists a course with given name.");
+                        JOptionPane.showMessageDialog(null,"There already exist a class with that name.","Class Already Exists",JOptionPane.ERROR_MESSAGE);
+                    }
                 }
                 else {
                     studentGroup.clear();

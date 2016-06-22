@@ -1,5 +1,7 @@
 package main.DataStore;
 
+import main.MainFrame;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -9,6 +11,8 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by phili on 2016-02-18.
@@ -17,6 +21,8 @@ import java.util.List;
  * lastnum:num,num,num,num;
  */
 public class SettingsLoader {
+
+    private Logger logger = MainFrame.logger;
 
     private List<Integer> scatteredIDNumbers = new ArrayList<>();
     private int lastIDNumber;
@@ -39,9 +45,9 @@ public class SettingsLoader {
                 lastIDNumber = Integer.parseInt(idArrayInfo[0]);
 
                 if (idArrayInfo.length != 1) {
-                    String[] scatterdIDArray = idArrayInfo[1].split(",");
-                    for (int scatterdIndex = 0; scatterdIndex < scatterdIDArray.length; scatterdIndex++) {
-                        scatteredIDNumbers.add(Integer.parseInt(scatterdIDArray[scatterdIndex]));
+                    String[] scatteredIDArray = idArrayInfo[1].split(",");
+                    for (int scatteredIndex = 0; scatteredIndex < scatteredIDArray.length; scatteredIndex++) {
+                        scatteredIDNumbers.add(Integer.parseInt(scatteredIDArray[scatteredIndex]));
                     }
                 }
             }else {
@@ -51,7 +57,7 @@ public class SettingsLoader {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        logger.log(Level.CONFIG,"Loaded lastID as "+lastIDNumber+" and scattered as "+scatteredIDNumbers);
     }
 
     public void saveSettingsInfo(BufferedOutputStream fileWriter) {
@@ -94,8 +100,9 @@ public class SettingsLoader {
         this.lastIDNumber = lastIDNumber;
     }
 
-    public void addScatterdIdNumber(final int scatterdIdNumber) {
-        scatteredIDNumbers.add(scatterdIdNumber);
+    public void addScatterdIdNumber(final int scatteredIDNumber) {
+        logger.log(Level.CONFIG,"Added scattered number: "+scatteredIDNumber);
+        scatteredIDNumbers.add(scatteredIDNumber);
         Collections.sort(scatteredIDNumbers);
     }
 }

@@ -105,4 +105,9 @@ public class CourseInfo {
     public CourseGradeModel getCourseGradeModel() {
         return courseGradeModel;
     }
+
+    @Override
+    public String toString() {
+        return courseName;
+    }
 }

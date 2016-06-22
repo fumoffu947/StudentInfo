@@ -6,18 +6,23 @@ import main.DataStore.Student;
 import main.DataStore.Teacher;
 import main.Interfaces.*;
 import main.Interfaces.InterfaceDataTransfer.StudentCreationReturn;
+import main.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by fumoffu on 2015-10-22.
  */
 public class PersonCreation implements main.Interfaces.Panel
 {
+    private Logger logger = MainFrame.logger;
+
     private final SettingsLoader settingsLoader;
     private JPanel pageHolder = new JPanel();
     private JTextField nameField = new JTextField(20);
@@ -42,9 +47,9 @@ public class PersonCreation implements main.Interfaces.Panel
         nameContainer.add(nameField);
 
         surnameContainer.setLayout(new BoxLayout(surnameContainer, BoxLayout.Y_AXIS));
-        final JTextField lastname = new JTextField("Surname");
-        lastname.setEditable(false);
-        surnameContainer.add(lastname);
+        final JTextField surname = new JTextField("Surname");
+        surname.setEditable(false);
+        surnameContainer.add(surname);
         surnameContainer.add(lastNameField);
 
         cellNumberContainer.setLayout(new BoxLayout(cellNumberContainer, BoxLayout.Y_AXIS));
@@ -54,9 +59,9 @@ public class PersonCreation implements main.Interfaces.Panel
         cellNumberContainer.add(cellNumber);
 
         emailContainer.setLayout(new BoxLayout(emailContainer, BoxLayout.Y_AXIS));
-        final JTextField emailadress = new JTextField("E-mail address");
-        emailadress.setEditable(false);
-        emailContainer.add(emailadress);
+        final JTextField emailAddress = new JTextField("E-mail address");
+        emailAddress.setEditable(false);
+        emailContainer.add(emailAddress);
         emailContainer.add(email);
 
         isTeacherContainer.setLayout(new BoxLayout(isTeacherContainer, BoxLayout.Y_AXIS));
@@ -80,11 +85,11 @@ public class PersonCreation implements main.Interfaces.Panel
         createButton.setAction(new AbstractAction()
         {
             @Override public void actionPerformed(final ActionEvent e) {
-                boolean gotScatterd = true;
+                boolean gotScattered = true;
                 int nextID = settingsLoader.getAScatterdIDNumber();
                 if (nextID == -1) {
                     nextID = settingsLoader.getLastIDNumber();
-                    gotScatterd = false;
+                    gotScattered = false;
                 }
                 String[] namesArray = nameField.getText().split(" ");
                 ArrayList<String> names = new ArrayList<>();
@@ -118,9 +123,10 @@ public class PersonCreation implements main.Interfaces.Panel
                             boolean successfulInsert = personLexicon.insertPersonToLexicon(student.getFirstName(), student);
                             if (successfulInsert) {
                                 scr.returnStudent(student);
-                                if (!gotScatterd) {
+                                if (!gotScattered) {
                                     settingsLoader.setLastIDNumber(nextID+1);
                                 }
+                                logger.log(Level.INFO,"The person: "+student+" was created");
                                 JOptionPane.showMessageDialog(null, "A person by name : "+student+" was created.","Person Creation",JOptionPane.INFORMATION_MESSAGE);
                             }else {
                                 JOptionPane.showMessageDialog(null,"An error occurred and the person was not created.",
@@ -130,9 +136,10 @@ public class PersonCreation implements main.Interfaces.Panel
                         }
                     } else {
                         personLexicon.insertPersonToLexicon(student.getFirstName(), student);
+                        logger.log(Level.INFO,"The person: "+student+" was created");
                         JOptionPane.showMessageDialog(null, "A person by name : "+student+" was created.","Person Creation",JOptionPane.INFORMATION_MESSAGE);
                         scr.returnStudent(student);
-                        if (!gotScatterd) {
+                        if (!gotScattered) {
                             settingsLoader.setLastIDNumber(nextID+1);
                         }
                     }

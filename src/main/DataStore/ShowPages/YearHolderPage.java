@@ -6,6 +6,7 @@ import main.DataStore.Lexicon.PersonLexicon;
 import main.DataStore.Student;
 import main.Interfaces.*;
 import main.Interfaces.InterfaceDataTransfer.StudentClicked;
+import main.MainFrame;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -20,11 +21,15 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by fumoffu on 2015-10-24.
  */
 public class YearHolderPage implements main.Interfaces.Panel {
+
+    private Logger logger = MainFrame.logger;
 
     private final RePackWindow rePackWindow;
     private StudentClicked studentClicked;
@@ -99,7 +104,7 @@ public class YearHolderPage implements main.Interfaces.Panel {
         System.out.println("setting up the panel");
         for (ClassInfo aClass : classes) {
             if (!aClass.getClassName().equals("No Class")) {
-                addClassToPage(aClass);
+                addClassToPage(aClass,false);
             }
         }
         startSetup = false;
@@ -108,7 +113,19 @@ public class YearHolderPage implements main.Interfaces.Panel {
         pageHolder.add(new JScrollPane(classContainer));
     }
 
-    public void addClassToPage(ClassInfo aClass) {
+    public boolean addNewClassToPage(ClassInfo classInfo) {
+        logger.log(Level.INFO,"Added new group to the list of all groups, group: "+classInfo.getClassName()+" students: "+classInfo.getStudents());
+        return addClassToPage(classInfo, true);
+    }
+
+    private boolean addClassToPage(ClassInfo aClass,boolean newClass) {
+        if (newClass) {
+            for (ClassInfo classInfo : classes) {
+                if (classInfo.getClassName().equals(aClass.getClassName())) {
+                    return false;
+                }
+            }
+        }
         DefaultTableModel tableModel = new DefaultTableModel();
 
         JTable table = new JTable(tableModel);
@@ -171,6 +188,7 @@ public class YearHolderPage implements main.Interfaces.Panel {
         if (!startSetup) {
             classes.add(aClass);
         }
+        return true;
     }
 
     public ClassInfo getClassInfoByName(String name) {

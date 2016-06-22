@@ -5,10 +5,9 @@ import main.DataStore.Lexicon.PersonLexicon;
 import main.Interfaces.InterfaceDataTransfer.GroupDataTransfer;
 import main.Interfaces.PaneInterfaceSwitches.SwitchToStudentCourseGrade;
 import main.Interfaces.Person;
+import main.MainFrame;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
@@ -18,12 +17,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by phili on 2016-01-16.
  * this is the page where all the courses can be found
  */
 public class CoursesPage implements main.Interfaces.Panel {
+
+    private Logger logger = MainFrame.logger;
 
     private List<CourseInfo> courses;
 
@@ -83,9 +86,9 @@ public class CoursesPage implements main.Interfaces.Panel {
                 int answer = JOptionPane.showConfirmDialog(null,"Are you sure you want to remove this course: "+courses.get(coursesInfoTable.getSelectedRow()),"Course Removal",JOptionPane.YES_NO_OPTION);
                 if (answer == JOptionPane.YES_OPTION) {
                     for (int courseindex = 0; courseindex < courses.get(coursesInfoTable.getSelectedRow()).getClassInfoList().size(); courseindex++) {
-                        personLexicon.removeCourseFromPresons(courses.get(coursesInfoTable.getSelectedRow()).getClassInfoList().get(courseindex).getStudents(),courses.get(coursesInfoTable.getSelectedRow()).getCourseName());
+                        personLexicon.removeCourseFromPersons(courses.get(coursesInfoTable.getSelectedRow()).getClassInfoList().get(courseindex).getStudents(),courses.get(coursesInfoTable.getSelectedRow()).getCourseName());
                     }
-                    personLexicon.removeCourseFromPresons(courses.get(coursesInfoTable.getSelectedRow()).getOtherEnlistedStudents(), courses.get(coursesInfoTable.getSelectedRow()).getCourseName());
+                    personLexicon.removeCourseFromPersons(courses.get(coursesInfoTable.getSelectedRow()).getOtherEnlistedStudents(), courses.get(coursesInfoTable.getSelectedRow()).getCourseName());
                     courses.remove(coursesInfoTable.getSelectedRow());
                     coursesAndInfoTableModel.removeRow(coursesInfoTable.getSelectedRow());
                 }
@@ -189,7 +192,7 @@ public class CoursesPage implements main.Interfaces.Panel {
                 gradeLevelModel.get(gradeRow).add(Integer.parseInt(gradeLevelRowArray[gradeCol]));
             }
         }
-
+        logger.log(Level.CONFIG,"Loaded course: "+courseName+" from file.");
         courses.add(new CourseInfo(classInfos,otherEnlistedArrayList,courseName,teacherArrayList,new CourseGoalModel(goals,parGoals,maxPointModel),listOfRemovedStudents,new CourseGradeModel(gradeLevelModel)));
     }
 
@@ -267,6 +270,7 @@ public class CoursesPage implements main.Interfaces.Panel {
         coursesAndInfoTableModel.addRow(new Object[] {courseInfo.getCourseName(),courseInfo.getTeachers().size(),
                 className, size,
                 courseInfo.getOtherEnlistedStudents().size()});
+        logger.log(Level.INFO,"Added course: "+courseInfo.getCourseName()+" to the list of courses.");
         courses.add(courseInfo);
     }
 
@@ -293,6 +297,16 @@ public class CoursesPage implements main.Interfaces.Panel {
             }
         }
         return null;
+    }
+
+    public boolean containsCourseWithName(String name) {
+        for(CourseInfo courseInfo: courses) {
+            if (courseInfo.getCourseName().equals(name)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

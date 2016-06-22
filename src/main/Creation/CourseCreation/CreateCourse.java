@@ -2,8 +2,10 @@ package main.Creation.CourseCreation;
 
 import main.DataStore.CourseGoalModel;
 import main.DataStore.CourseGradeModel;
+import main.DataStore.ShowPages.CoursesPage;
 import main.Interfaces.*;
 import main.Interfaces.PaneInterfaceSwitches.SwitchToAddStudentTeacherToCourse;
+import main.Interfaces.PaneInterfaceSwitches.SwitchToCreateFromCourse;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -18,38 +20,14 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * An example to get me going
  *
- * DefaultTableModel tableModel = new DefaultTableModel();
- * tableModel.addColumn("FirstName");
- * tableModel.addColumn("LastName");
- * tableModel.addColumn("Sport");
- * tableModel.addColumn("# of Years");
- * tableModel.addColumn("Vegetarian");
- *
- * tableModel.addRow(new Object[] {"Kathy", "Smith",
- * "Snowboarding", new Integer(5), new Boolean(false)});
- * tableModel.addRow(new Object[] {"John", "Doe",
- * "Rowing", new Integer(3), new Boolean(true)});
- * tableModel.addRow(new Object[] {"Sue", "Black",
- * "Knitting", new Integer(2), new Boolean(false)});
- * tableModel.addRow(new Object[] {"Jane", "White",
- * "Speed reading", new Integer(20), new Boolean(true)});
- * tableModel.addRow(new Object[] {"Joe", "Brown",
- * "Pool", new Integer(10), new Boolean(false)});
- *
- * final JTable table = new JTable(tableModel);
- * table.setPreferredScrollableViewportSize(new Dimension(500, 70));
- * table.setFillsViewportHeight(true);
- * tableModel.addColumn("troll");
- * System.out.println(tableModel.getColumnCount() + " " + tableModel.getRowCount());
- * tableModel.setValueAt("trolls",0,tableModel.getColumnCount()-1);
- * this.setContentPane(table);
  */
 public class CreateCourse implements main.Interfaces.Panel {
 
 	private final RePackWindow rePackWindow;
 	private final SwitchToAddStudentTeacherToCourse switchPanel;
+	private final SwitchToCreateFromCourse switchToCreateFromCourse;
+	private final CoursesPage coursePage;
 	private JTextField courseNameWriteField = new JTextField();
 	private JPanel pageHolder = new JPanel();
 
@@ -64,14 +42,18 @@ public class CreateCourse implements main.Interfaces.Panel {
 	private JButton addMilestoneButton = new JButton();
 	private JButton addObjectiveButton = new JButton();
 	private JButton continueToNextStep = new JButton();
+	private JButton createFromCourseButton = new JButton();
 
 	private int nextObjectiveNumber = 2;
 
 	private Pattern numberPattern = Pattern.compile("[0-9]+");
 
-	public CreateCourse(RePackWindow rePackWindow, SwitchToAddStudentTeacherToCourse switchPanel) {
+	public CreateCourse(RePackWindow rePackWindow, SwitchToAddStudentTeacherToCourse switchPanel, SwitchToCreateFromCourse switchToCreateFromCourse,
+						CoursesPage coursesPage) {
 		this.rePackWindow = rePackWindow;
 		this.switchPanel = switchPanel;
+		this.coursePage = coursesPage;
+		this.switchToCreateFromCourse = switchToCreateFromCourse;
 		tableModel.addColumn("Objective Column");
 		tableModel.addColumn("Milestone 1: E");
 		tableModel.addColumn("Milestone 1: C");
@@ -296,7 +278,7 @@ public class CreateCourse implements main.Interfaces.Panel {
 						}
 					}
 				}
-				if (!milestone.isEmpty() && !objectives.isEmpty() && !name.isEmpty()) {
+				if (!milestone.isEmpty() && !objectives.isEmpty() && name != null && !name.isEmpty() && !coursePage.containsCourseWithName(name)) {
 					clearMenuBar(jMenuBar);
 					rePackWindow.rePackWindow();
 					switchPanel.startChooseGroupPage(name, new CourseGoalModel(objectives, milestone, maxPointModel), new CourseGradeModel(gradeLevelModel));
@@ -311,6 +293,15 @@ public class CreateCourse implements main.Interfaces.Panel {
 		});
 		continueToNextStep.setText("Continue");
 		jMenuBar.add(continueToNextStep);
+
+		createFromCourseButton.setAction(new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				switchToCreateFromCourse.switchToPage();
+			}
+		});
+		createFromCourseButton.setText("Create From Course");
+		jMenuBar.add(createFromCourseButton);
 	}
 
 	@Override
@@ -318,6 +309,7 @@ public class CreateCourse implements main.Interfaces.Panel {
 		jMenuBar.remove(addMilestoneButton);
 		jMenuBar.remove(addObjectiveButton);
 		jMenuBar.remove(continueToNextStep);
+		jMenuBar.remove(createFromCourseButton);
 	}
 
 	@Override
