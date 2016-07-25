@@ -1,12 +1,13 @@
 package main.DataStore;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by phili on 2016-01-17.
  */
-public class StudentGrade {
+public class StudentGrade implements Serializable {
 
     // first row then columns
     private ArrayList<ArrayList<Integer>> grades = new ArrayList<>();

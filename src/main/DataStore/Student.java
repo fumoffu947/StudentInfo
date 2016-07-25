@@ -72,7 +72,16 @@ public class Student implements Person {
 	return name;
     }
 
-    public String getLastName() {
+	public String getNameString() {
+		StringBuilder sb = new StringBuilder();
+		for(String s : name) {
+			sb.append(s);
+			sb.append(" ");
+		}
+		return sb.toString();
+	}
+
+    public String getSurname() {
 	return lastName;
     }
 

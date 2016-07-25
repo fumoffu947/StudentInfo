@@ -14,4 +14,6 @@ public interface Person {
     String toString();
 
     int getID();
+
+    // int getDBID(); istead of getID();
 }

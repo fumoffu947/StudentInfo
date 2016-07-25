@@ -104,7 +104,7 @@ public class DataSaver implements Runnable {
                 // end of info 1
                 stringBuilder.append(";");
 
-                // writhe the name for the class to add to the course to get from the YearHolderPage (May change name to Groups or similar)
+                // write the name for the class to add to the course to get from the YearHolderPage (May change name to Groups or similar)
                 for (int i = 0; i < courses.get(courseIndex).getClassInfoList().size(); i++) {
                     stringBuilder.append(courses.get(courseIndex).getClassInfoList().get(i).getClassName());
                     if (i != courses.get(courseIndex).getClassInfoList().size()-1) {

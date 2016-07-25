@@ -7,7 +7,6 @@ import main.DataStore.Teacher;
 import main.Interfaces.Person;
 import main.Interfaces.PersonSearchFunction;
 import main.MainFrame;
-import sun.rmi.runtime.Log;
 
 import java.io.*;
 import java.util.*;
@@ -119,7 +118,7 @@ public class PersonLexicon {
                             stringBuilder.append(",");
 
                             // add surname
-                            stringBuilder.append(teacher.getLastName());
+                            stringBuilder.append(teacher.getSurname());
                             stringBuilder.append(",");
 
                             //add the position of the firstname
@@ -155,7 +154,7 @@ public class PersonLexicon {
                             stringBuilder.append(",");
 
                             // add surname
-                            stringBuilder.append(student.getLastName());
+                            stringBuilder.append(student.getSurname());
                             stringBuilder.append(",");
 
                             //add the position of the firstname
