@@ -1,4 +1,8 @@
-package main.DataStore;
+package main.DataStore.CoursePakage;
+
+import main.DataStore.ClassInfo;
+import main.DataStore.Student;
+import main.DataStore.Teacher;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,19 +1,18 @@
 package main.DataStore;
 
+import main.DataStore.CoursePakage.CourseGoalModel;
+import main.DataStore.CoursePakage.CourseInfo;
 import main.DataStore.Lexicon.PersonLexicon;
 import main.DataStore.ShowPages.CoursesPage;
 import main.DataStore.ShowPages.YearHolderPage;
-import main.MainFrame;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * Created by phili on 2016-02-14.

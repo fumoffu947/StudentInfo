@@ -1,6 +1,8 @@
 package main.Creation.CourseCreation;
 
 import main.DataStore.*;
+import main.DataStore.CoursePakage.CourseGoalModel;
+import main.DataStore.CoursePakage.CourseGradeModel;
 import main.Interfaces.PaneInterfaceSwitches.SwitchToAddStudentTeacherToCourse;
 import main.Interfaces.Panel;
 

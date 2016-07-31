@@ -2,6 +2,7 @@ package main.DataStore.ShowPages;
 
 import main.Creation.CourseCreation.MyTableModel;
 import main.DataStore.*;
+import main.DataStore.CoursePakage.CourseInfo;
 import main.DataStore.Lexicon.PersonLexicon;
 import main.Interfaces.*;
 import main.Interfaces.InterfaceDataTransfer.StartGetListOfStudents;

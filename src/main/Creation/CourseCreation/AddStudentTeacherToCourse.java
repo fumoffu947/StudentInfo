@@ -1,6 +1,9 @@
 package main.Creation.CourseCreation;
 
 import main.DataStore.*;
+import main.DataStore.CoursePakage.CourseGoalModel;
+import main.DataStore.CoursePakage.CourseGradeModel;
+import main.DataStore.CoursePakage.CourseInfo;
 import main.DataStore.Lexicon.PersonLexicon;
 import main.Interfaces.*;
 import main.Interfaces.PaneInterfaceSwitches.SwitchToStudentCourseGrade;
@@ -12,11 +15,9 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

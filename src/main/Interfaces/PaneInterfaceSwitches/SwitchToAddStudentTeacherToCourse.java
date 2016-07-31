@@ -1,8 +1,8 @@
 package main.Interfaces.PaneInterfaceSwitches;
 
 import main.DataStore.ClassInfo;
-import main.DataStore.CourseGoalModel;
-import main.DataStore.CourseGradeModel;
+import main.DataStore.CoursePakage.CourseGoalModel;
+import main.DataStore.CoursePakage.CourseGradeModel;
 
 import java.util.List;
 

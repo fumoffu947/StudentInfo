@@ -7,9 +7,7 @@ import main.Interfaces.Person;
 import main.Interfaces.PersonSearchFunction;
 import main.MainFrame;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -22,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DatabaseHandle {
@@ -33,21 +32,21 @@ public class DatabaseHandle {
 	private static int MAX = 32672; // max int for the Java DB
 	private static String[]
 			tableConfig =  { "CREATE TABLE SI_PERSON_TABLE (PERSON_ID INTEGER GENERATED ALWAYS AS IDENTITY" +
-					 " (START WITH 1, INCREMENT BY 1),FIRST_NAME varchar(64) NOT NULL, " +
-					 "NAMES varchar(255) NOT NULL, SURNAME varchar(255) NOT NULL, CELL_NUM varchar(50)," +
-					 "EMAIL varchar(255), IS_TEACHER BOOLEAN NOT NULL, PRIMARY KEY (PERSON_ID))",
+			" (START WITH 1, INCREMENT BY 1),FIRST_NAME varchar(64) NOT NULL, " +
+			"NAMES varchar(255) NOT NULL, SURNAME varchar(255) NOT NULL, CELL_NUM varchar(50)," +
+			"EMAIL varchar(255), IS_TEACHER BOOLEAN NOT NULL, PRIMARY KEY (PERSON_ID))",
 			"CREATE TABLE SI_COURSE_TABLE (COURSE_ID INT NOT NULL  GENERATED ALWAYS AS IDENTITY, COURSE_NAME VARCHAR(1000) NOT NULL UNIQUE," +
-			"GROUPS VARCHAR(200) NOT NULL, OTHER_STUDENTS VARCHAR(800) NOT NULL, TEACHERS VARCHAR(80) NOT NULL," +
-			"OBJECTIVES VARCHAR("+MAX+") NOT NULL, MILESTONES VARCHAR("+MAX+") NOT NULL," +
-			"MAX_POINTS VARCHAR("+MAX+") NOT NULL, REMOVED VARCHAR(800) NOT NULL, " +
-			"GRADE_LEVELS VARCHAR("+MAX+") NOT NULL," +
-			"PRIMARY KEY (COURSE_ID))",
+					"GROUPS VARCHAR(200) NOT NULL, OTHER_STUDENTS VARCHAR(800) NOT NULL, TEACHERS VARCHAR(80) NOT NULL," +
+					"OBJECTIVES VARCHAR("+MAX+") NOT NULL, MILESTONES VARCHAR("+MAX+") NOT NULL," +
+					"MAX_POINTS VARCHAR("+MAX+") NOT NULL, REMOVED VARCHAR(800) NOT NULL, " +
+					"GRADE_LEVELS VARCHAR("+MAX+") NOT NULL," +
+					"PRIMARY KEY (COURSE_ID))",
 			"CREATE TABLE SI_GRADE_TABLE (GRADE_ID INT NOT NULL GENERATED ALWAYS AS IDENTITY, STUDENT_ID INT NOT NULL," +
-			"COURSE_ID INT NOT NULL, GRADE VARCHAR(6000) NOT NULL, PRIMARY KEY (GRADE_ID)," + // 20*2*20 = 2400 -> 3000(*2) TO BE SAFE 6000
-			"FOREIGN KEY (STUDENT_ID) REFERENCES SI_PERSON_TABLE (PERSON_ID), " +
-			"FOREIGN KEY (COURSE_ID) REFERENCES SI_COURSE_TABLE (COURSE_ID))",
+					"COURSE_ID INT NOT NULL, GRADE VARCHAR(6000) NOT NULL, PRIMARY KEY (GRADE_ID)," + // 20*2*20 = 2400 -> 3000(*2) TO BE SAFE 6000
+					"FOREIGN KEY (STUDENT_ID) REFERENCES SI_PERSON_TABLE (PERSON_ID), " +
+					"FOREIGN KEY (COURSE_ID) REFERENCES SI_COURSE_TABLE (COURSE_ID))",
 			"CREATE TABLE SI_GROUP_TABLE (GROUP_ID INT NOT NULL  GENERATED ALWAYS AS IDENTITY, GROUP_NAME CARCHAR(500) NOT NULL UNIQUE," +
-			" PERSONS VARCHAR(600) NOT NULL, PRIMARY KEY (GROUP_ID))"};
+					" PERSONS VARCHAR(600) NOT NULL, PRIMARY KEY (GROUP_ID))"};
 	private static String[] tablenames = {"SI_PERSON_TABLE","SI_GRADE_TABLE","SI_GROUP_TABLE","SI_COURSE_TABLE"};
 	private String url = "jdbc:derby:content/SI_DATABASE;create=true";
 
@@ -64,7 +63,7 @@ public class DatabaseHandle {
 
 		// if username and password sould be used??
 
-		CreateTables();
+		//CreateTables();
 		shutdownDatabase();
 	}
 
@@ -78,10 +77,10 @@ public class DatabaseHandle {
 				if (!sqlState.equalsIgnoreCase("XJ015")) { // check the right state and code for shuting down the DB
 
 					System.err.println("SQLState: " +
-							   ((SQLException)e).getSQLState());
+							((SQLException)e).getSQLState());
 
 					System.err.println("Error Code: " +
-							   ((SQLException)e).getErrorCode());
+							((SQLException)e).getErrorCode());
 
 					System.err.println("Message: " + e.getMessage());
 
@@ -117,16 +116,18 @@ public class DatabaseHandle {
 		try (Connection conn = DriverManager.getConnection(url)) {
 			List<String> tmpExistingTables = new ArrayList<>();
 			DatabaseMetaData md = conn.getMetaData();
-			try (ResultSet rsmd = md.getTables(null, null, "SI_%", null)) {
-				while (rsmd.next()) {
-					final String table_name = rsmd.getString("TABLE_NAME");
+			try (ResultSet mdrs = md.getTables(null, null, "SI_%", null)) {
+				while (mdrs.next()) {
+					final String table_name = mdrs.getString("TABLE_NAME");
 					tmpExistingTables.add(table_name);
-					System.out.println(table_name+" Already exists");
+					System.out.println();
+					logger.log(Level.CONFIG,"The table " + table_name+" Already exists");
 				}
 			}
 			for (int i = 0; i < tablenames.length; i++) {
 				if (!tmpExistingTables.contains(tablenames[i])) {
 					try (Statement stmt = conn.createStatement()) {
+						logger.log(Level.CONFIG,"Table "+tablenames[i]+" was created.");
 						stmt.executeUpdate(tableConfig[i]);
 					}
 				}
@@ -144,10 +145,17 @@ public class DatabaseHandle {
 		}
 	}
 
+	/**
+	 * This method is used to insert a person into the database
+	 * @param person
+	 * person is the person to be inserted into the database
+	 * @return
+	 * returns true if the person was inserted false otherwise
+     */
 	public boolean insertPerson(Person person) {
 		try (Connection conn = DriverManager.getConnection(url)) {
 			String insertQuery = "INSERT INTO SI_PERSON_TABLE (FIRST_NAME,NAMES,SURNAME,CELL_NUM,EMAIL,IS_TEACHER) " +
-					     "VALUES (?,?,?,?,?,?)";
+					"VALUES (?,?,?,?,?,?)";
 			String firstName;
 			String names;
 			String surname;
@@ -213,7 +221,7 @@ public class DatabaseHandle {
 	 * the prefix to check after in the lexicon
 	 * @return
 	 * return true if the a name contains the prefix false if not
-	 */ // chould fix so that prepStmt and rs is with try catch and finally so it always closes
+	 */
 	public boolean containsPrefix(String namePrefix) {
 		boolean foundPrefix = false;
 		try (Connection conn = DriverManager.getConnection(url)) {
@@ -251,19 +259,7 @@ public class DatabaseHandle {
 					"SELECT * FROM SI_PERSON_TABLE WHERE FIRST_NAME LIKE ?")) {
 				prepStmt.setString(1, namePrefix + '%');
 				try (ResultSet rs = prepStmt.executeQuery()) {
-					while (rs.next()) {
-						if (rs.getBoolean(7)) {
-							List<String> names = Arrays.asList(rs.getString("NAMES").split(" "));
-							collection.add(new Teacher(names,rs.getString("SURNAME"),
-										   names.indexOf(rs.getString("FIRST_NAME")),rs.getString("CELL_NUM"),
-										   rs.getString("EMAIL"),rs.getInt("PERSON_ID")));
-						} else {
-							List<String> names = Arrays.asList(rs.getString("NAMES").split(" "));
-							collection.add(new Teacher(names,rs.getString("SURNAME"),
-										   names.indexOf(rs.getString("FIRST_NAME")),rs.getString("CELL_NUM"),
-										   rs.getString("EMAIL"),rs.getInt("PERSON_ID")));
-						}
-					}
+					createPersonCollectionFromResultSet(collection, rs);
 				}
 			}
 		} catch (SQLException e) {
@@ -289,25 +285,29 @@ public class DatabaseHandle {
 				prepStmt.setString(1, name);
 				prepStmt.setBoolean(2,isTeacher);
 				try (ResultSet rs = prepStmt.executeQuery()) {
-					while (rs.next()) {
-						if (rs.getBoolean(7)) {
-							List<String> names = Arrays.asList(rs.getString("NAMES").split(" "));
-							collection.add(new Teacher(names,rs.getString("SURNAME"),
-										   names.indexOf(rs.getString("FIRST_NAME")),rs.getString("CELL_NUM"),
-										   rs.getString("EMAIL"),rs.getInt("PERSON_ID")));
-						} else {
-							List<String> names = Arrays.asList(rs.getString("NAMES").split(" "));
-							collection.add(new Teacher(names,rs.getString("SURNAME"),
-										   names.indexOf(rs.getString("FIRST_NAME")),rs.getString("CELL_NUM"),
-										   rs.getString("EMAIL"),rs.getInt("PERSON_ID")));
-						}
-					}
+					createPersonCollectionFromResultSet(collection, rs);
 				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return collection;
+	}
+
+	private void createPersonCollectionFromResultSet(Collection<Person> collection, ResultSet rs) throws SQLException {
+		while (rs.next()) {
+            if (rs.getBoolean(7)) {
+                List<String> names = Arrays.asList(rs.getString("NAMES").split(" "));
+                collection.add(new Teacher(names,rs.getString("SURNAME"),
+                        names.indexOf(rs.getString("FIRST_NAME")),rs.getString("CELL_NUM"),
+                        rs.getString("EMAIL"),rs.getInt("PERSON_ID")));
+            } else {
+                List<String> names = Arrays.asList(rs.getString("NAMES").split(" "));
+                collection.add(new Student(names,rs.getString("SURNAME"),
+                        names.indexOf(rs.getString("FIRST_NAME")),rs.getString("CELL_NUM"),
+                        rs.getString("EMAIL"),rs.getInt("PERSON_ID")));
+            }
+        }
 	}
 
 	/**
@@ -322,7 +322,7 @@ public class DatabaseHandle {
 		StudentGrade grade = null;
 		try (Connection conn = DriverManager.getConnection(url)) {
 			try (PreparedStatement prepStmt = conn.prepareStatement(
-					"SELECT * FROM SI_GRADE_TABLE WHERE " + "STUDENT_ID = ? AND COURSE_ID = ?")) {
+					"SELECT * FROM SI_GRADE_TABLE WHERE STUDENT_ID = ? AND COURSE_ID = ?")) {
 				prepStmt.setInt(1, personID);
 				prepStmt.setInt(2, courseID);
 				try (ResultSet rs = prepStmt.executeQuery()) {
@@ -358,9 +358,28 @@ public class DatabaseHandle {
 	 */
 	public boolean insertStudentGrade(int studentID, StudentGrade studentGrade, int courseID) {
 		try (Connection conn = DriverManager.getConnection(url)) {
-			PreparedStatement prepStmt = conn
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(baos);
+			oos.writeObject(studentGrade);
+			byte[] b = baos.toByteArray();
+			ByteArrayInputStream bais = new ByteArrayInputStream(b);
+
+			PreparedStatement prepStmt = conn.prepareStatement("INSERT INTO SI_GRADE_TABLE (STUDENT_ID,COURSE_ID,GRADE) VALUES(?,?,?)");
+			prepStmt.setInt(1,studentID);
+			prepStmt.setInt(2,courseID);
+			prepStmt.setBinaryStream(3,bais,b.length);
+			prepStmt.executeUpdate();
+
+			prepStmt.close();
+			baos.close();
+			oos.close();
+			bais.close();
+
 		} catch(SQLException e) {
 			printSQLException(e);
+			return false;
+		} catch (IOException e) {
+			e.printStackTrace();
 			return false;
 		}
 		return false;
@@ -368,39 +387,120 @@ public class DatabaseHandle {
 
 	/**
 	 * Removes the given person from the lexicon and all grades associated with that person
-	 * @param person
+	 * @param personID
 	 * given person to remove from the lexicon
 	 * @return
 	 * return true if the person exists and was removed else false
 	 */
-	public boolean removePerson(Person person) {
-		return false;
+	public boolean removePerson(int personID) {
+		int result;
+		try (Connection conn = DriverManager.getConnection(url)) {
+			PreparedStatement prepStmt = conn.prepareStatement("DELETE FROM SI_GRADE_TABLE WHERE STUDENT_ID = ?");
+			prepStmt.setInt(1,personID);
+			result = prepStmt.executeUpdate();
+			prepStmt.close();
+			if (result == 0) {
+				return false;
+			}
+
+			prepStmt = conn.prepareStatement("DELETE FROM SI_PERSON_TABLE WHERE PERSON_ID = ?");
+			prepStmt.setInt(1,personID);
+			result = prepStmt.executeUpdate();
+			prepStmt.close();
+			if (result == 0) {
+				return false;
+			}
+			return true;
+
+		} catch(SQLException e) {
+			printSQLException(e);
+			return false;
+		}
 	}
 
 	/**
 	 * This is meant to get all the students in the lexicon
-	 * it goes through all the nodes and add all the persons who
-	 * is a student to a list and then return the list to the caller
 	 * @return
 	 * A list of all the student currently in the lexicon
 	 */
-	public List<Student> getAllStudents() {
-		return null;
+	public List<Student> getAllStudents() { // maby fix so that this becomes a separate thread
+		ArrayList<Student> students = new ArrayList<>();
+		try (Connection conn = DriverManager.getConnection(url)) {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT * FROM SI_PERSON_TABLE WHERE IS_TEACHER = TRUE");
+			while (rs.next()) {
+				List<String> names = Arrays.asList(rs.getString("NAMES").split(" "));
+				students.add(new Student(names,rs.getString("SURNAME"),
+						names.indexOf(rs.getString("FIRST_NAME")),rs.getString("CELL_NUM"),
+						rs.getString("EMAIL"),rs.getInt("PERSON_ID")));
+			}
+
+		} catch(SQLException e) {
+			printSQLException(e);
+			return students;
+		}
+		return students;
 	}
 
 	/**
 	 * this method returns all the course names for the given person
-	 * @param person
+	 * @param personID
 	 * Given person to get the courses for
 	 * @return
 	 * returns a list of all the courses for given person
 	 */
-	public List<String> getCourseNamesForPerson(Person person) {
-		return null;
+	public List<String> getCourseNamesForPerson(int personID) {
+		List<String> courseNames = new ArrayList<>();
+		try (Connection conn = DriverManager.getConnection(url)) {
+			List<Integer> courseIDs = new ArrayList<>();
+			PreparedStatement prepStmt = conn.prepareStatement("SELECT COURSE_ID FROM SI_GRADE_TABLE WHERE STUDENT_ID = ?");
+			prepStmt.setInt(1,personID);
+			ResultSet rs = prepStmt.executeQuery();
+			while (rs.next()) {
+				courseIDs.add(rs.getInt("COURSE_ID"));
+			}
+			rs.close();
+			prepStmt.close();
+
+			prepStmt = conn.prepareStatement("SELECT COURSE_NAME FROM SI_GRADE_TABLE WHERE COURSE_ID = ?");
+			for (int i = 0; i < courseIDs.size(); i++) {
+				prepStmt.setInt(1,courseIDs.get(i));
+				rs = prepStmt.executeQuery();
+				while (rs.next()) {
+					courseNames.add(rs.getString("COURSE_NAME"));
+					// if the course names should not be unique ########################################################
+					//courseNames.add(new MiniCourseInfo(rs.getString("COURSE_NAME"),rs.getInt("COURSE_ID"))); #########
+				}
+				rs.close();
+
+			}
+			prepStmt.close();
+			return courseNames;
+		} catch(SQLException e) {
+			printSQLException(e);
+			return courseNames;
+		}
 	}
 
-	public void removeCourseFromPersons(List<Student> students, String courseName) {
-
+	/**
+	 * removes the given course from the given list of students
+	 * @param personsID
+	 * the person to remove the course from
+	 * @param courseID
+	 * the course to remove
+	 */
+	public void removeCourseFromPersons(List<Integer> personsID, int courseID) {
+		try (Connection conn = DriverManager.getConnection(url)) {
+			PreparedStatement prepStmt = conn.prepareStatement("DELETE FROM SI_GRADE_TABLE WHERE COURSE_ID = ? AND STUDENT_ID = ?");
+			for(int id: personsID) {
+				prepStmt.setInt(1, courseID);
+				prepStmt.setInt(2,id);
+				prepStmt.executeUpdate();
+			}
+			prepStmt.close();
+		} catch(SQLException e) {
+			printSQLException(e);
+		}
 	}
 
 	public static DatabaseHandle getDatabaseHandle() {

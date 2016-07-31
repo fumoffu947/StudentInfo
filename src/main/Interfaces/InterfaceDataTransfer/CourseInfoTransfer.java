@@ -1,6 +1,6 @@
 package main.Interfaces.InterfaceDataTransfer;
 
-import main.DataStore.CourseInfo;
+import main.DataStore.CoursePakage.CourseInfo;
 
 /**
  * Created by phili on 2016-03-29.

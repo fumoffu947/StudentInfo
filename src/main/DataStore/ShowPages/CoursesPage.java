@@ -1,6 +1,9 @@
 package main.DataStore.ShowPages;
 
 import main.DataStore.*;
+import main.DataStore.CoursePakage.CourseGoalModel;
+import main.DataStore.CoursePakage.CourseGradeModel;
+import main.DataStore.CoursePakage.CourseInfo;
 import main.DataStore.Lexicon.PersonLexicon;
 import main.Interfaces.InterfaceDataTransfer.GroupDataTransfer;
 import main.Interfaces.PaneInterfaceSwitches.SwitchToStudentCourseGrade;
